@@ -1,0 +1,8 @@
+IOT/.venv/
+IOT/__pycache__/
+IOT/flaskr/__pycache__/__init__.cpython-38.pyc
+IOT/flaskr/__pycache__/
+IOT/node_modules/
+IOT/flaskr/models/finalized_model.saver
+IOT/.ipynb_checkpoints/
+IOT/model_sensor.sav
