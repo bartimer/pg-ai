@@ -10,7 +10,7 @@ For the IOT & Big data module within the postgraduate on AI @ EHB we have to dem
 
 ### High level overview of setup
 
-![Architecture](app/src/assets/IOT-assignment.svg "architectural overview")
+![Architecture](app/src/assets/IOT-assigment.svg "architectural overview")
 
 
 
