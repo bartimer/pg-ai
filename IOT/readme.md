@@ -7,10 +7,12 @@ For the IOT & Big data module within the postgraduate on AI @ EHB we have to dem
     * The Jupyter notebook can be found [here](./IOTAssignment.ipynb)
 1. Visualize all this information in a UI
     * The web application can be found [here](./app/src)
+
 <div align="center" max-width="730px">
-<iframe src="https://user-images.githubusercontent.com/169707/126715420-991ad821-9ac8-4b66-b79e-e0966e0f3a89.mp4" controls="controls" style="max-width: 730px;">
-</iframe>
-   </div>
+<video src="https://user-images.githubusercontent.com/120823/155517492-061b58d6-2bb5-4dd3-ba29-e5d9fa10ad0c.mp4" data-canonical-src="https://user-images.githubusercontent.com/120823/155517492-061b58d6-2bb5-4dd3-ba29-e5d9fa10ad0c.mp4" controls="controls" muted="muted" class="d-block rounded-bottom-2 border-top width-fit" style="max-height:640px;">
+
+  </video>
+</div>
 
 ### High level overview of setup
 
