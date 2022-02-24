@@ -6,3 +6,4 @@ IOT/node_modules/
 IOT/flaskr/models/finalized_model.saver
 IOT/.ipynb_checkpoints/
 IOT/model_sensor.sav
+IOT/flaskr/config.py

@@ -1,8 +1,8 @@
 import requests
 import sys
 from datetime import datetime
+from flaskr.config import api_key
 
-api_key = "ae9d91fa0cb209a2d81b0f3633014002"
 lat = "50.84227998732948"
 lon = "4.322829819747444"
 url = f"https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&appid={api_key}&units=metric"
