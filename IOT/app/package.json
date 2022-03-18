@@ -23,6 +23,8 @@
     "react-query": "^3.34.14",
     "react-router-dom": "^6.2.1",
     "react-scripts": "5.0.0",
+    "react-thermometer": "^0.0.3",
+    "react-thermometer-component": "^1.0.1",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

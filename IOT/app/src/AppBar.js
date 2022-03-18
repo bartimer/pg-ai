@@ -13,6 +13,7 @@ import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import { Link as RouterLink, MemoryRouter } from 'react-router-dom';
 import { ReactComponent as Logo } from './assets/logo-ehb-small.svg';
+import me from './assets/me.png'
 
 const pages = [{ label: 'Branches', link: '/branch' }, { label: 'Configuration', link: '/branch' }];
 const settings = ['Account', 'Dashboard', 'Logout'];
@@ -109,7 +110,7 @@ const ResponsiveAppBar = () => {
           <Box sx={{ flexGrow: 0 }}>
             <Tooltip title="Open settings">
               <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" />
+                <Avatar alt="Bart" src={me} />
               </IconButton>
             </Tooltip>
             <Menu
