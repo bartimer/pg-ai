@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Webcam from "react-webcam";
 import * as handPoseDetection from '@tensorflow-models/hand-pose-detection';
 // Register WebGL backend.
@@ -6,44 +6,81 @@ import '@tensorflow/tfjs-backend-webgl';
 import { drawHand } from "./Drawing";
 import { gestures } from "./Gestures";
 import { GestureEstimator } from "fingerPoseEstimator";
+import { useInterval } from "useInterval";
 
-export function RockPaperScissor(){
-    const webcamRef = useRef(null);
-  const canvasRef = useRef(null);
-  const model = handPoseDetection.SupportedModels.MediaPipeHands;
 const detectorConfig = {
   runtime: 'tfjs', // or 'tfjs'
   modelType: 'full',
   maxHands:1
 };
 
-
-const createDetector = async() => {
-    const detector = await handPoseDetection.createDetector(model, detectorConfig);
-    
-    const gestureEstimator = new GestureEstimator(gestures);
-    setInterval(async ()=>{
-        const hands = await detect(detector);
-        if (hands?.length > 0){
-            console.log(hands);
-            const gestureEstimations = gestureEstimator.estimate(
-                hands[0].keypoints3D, 0.1
-              );
-              
-              if(gestureEstimations.gestures.length > 0) {
-                
-                // 3. extract gesture with highest match score
-                const gestureResult = gestureEstimations.gestures.reduce(
-                  (p, c) => { return (p.score > c.score) ? p : c; }
-                );
-                console.log("gesture:", gestureResult.name);
-                return gestureResult.name;
-              }
+export function RockPaperScissor(){
+    const webcamRef = useRef(null);
+  const canvasRef = useRef(null);
+  const [resultingGesture, setResultingGesture] = useState('');
+  const [detector, setDetector] = useState(null);
+  const model = handPoseDetection.SupportedModels.MediaPipeHands;
+  
+  const numberOfGestures = 5;
+  let gestureCount = 0;
+  const defaultGestures = {'rock':[],'paper':[], 'scissors':[]};
+  let lastGestures = {...defaultGestures};
+  const gestureEstimator = new GestureEstimator(gestures);  
+useEffect(() => {
+  const createDetector = async() => {
+    const s = await handPoseDetection.createDetector(model, detectorConfig);
+    setDetector(s);
+  } 
+  createDetector();
+  
+},[])
+useInterval(async ()=>{
+  if (!detector)
+    return;
+  const hands = await detect(detector);
+  if (hands?.length > 0){
+      
+      const gestureEstimations = gestureEstimator.estimate(
+          hands[0].keypoints3D, 0.5
+        );
+        
+        if(gestureEstimations.gestures.length > 0) {
+          
+          if (gestureCount < 5){
+            gestureCount++;
+            gestureEstimations.gestures.map(x =>{
+              lastGestures[x.name].push(x.score);
+            })
+          } else {
+            const g = getMostLikely(lastGestures);
+            console.log("last gestures:",lastGestures);
+            setResultingGesture(g);
+            gestureCount = 0;
+            lastGestures = {'rock':[],'paper':[], 'scissors':[]};
+            console.log("resulting gesture:",g);
+            
+          }
+          // 3. extract gesture with highest match score
+          const gestureResult = gestureEstimations.gestures.reduce(
+            (p, c) => { return (p.score > c.score) ? p : c; }
+          );
+          //console.log("gesture:", gestureResult.name);
+          return gestureResult.name;
         }
-    },1000)
+  }
+}, 100)
+const getMostLikely  = list => {
+  let best = 'rock';
+  const sum = arr => arr.reduce((a, b) => a + b, 0)
+  for (const [key, value] of Object.entries(list)) {
+    if (sum(value) > sum(list[best]))
+      best = key
+  }
+  return best;
 }
 
 const detect = async (net) => {
+  if (!net) return null;
     // Check data is available
     if (
       typeof webcamRef.current !== "undefined" &&
@@ -66,7 +103,7 @@ const detect = async (net) => {
     }
       // Make Detections
       const hand = await net.estimateHands(video,{flipHorizontal:false});
-      console.log(hand);
+      //console.log(hand);
 
       // Draw mesh
        const ctx = canvasRef.current?.getContext("2d");
@@ -76,12 +113,11 @@ const detect = async (net) => {
     }
   };
 
-createDetector();
 
-// const estimationConfig = {flipHorizontal: false};
-// const hands = await detector.estimateHands(image, estimationConfig);
+
     return <>
         <h4>Rock paper scissors</h4>
+        <div style={{width:640,height:480}}>
         <Webcam
           ref={webcamRef}
           style={{
@@ -111,5 +147,7 @@ createDetector();
             height: 480,
           }}
         />
+        </div>
+        <h6 >Result: {resultingGesture}</h6>
     </>
 }
