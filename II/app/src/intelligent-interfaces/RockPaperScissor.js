@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useReducer, useRef, useState } from "react";
 import Webcam from "react-webcam";
 import * as handPoseDetection from '@tensorflow-models/hand-pose-detection';
 // Register WebGL backend.
@@ -7,6 +7,12 @@ import { drawHand } from "./Drawing";
 import { gestures } from "./Gestures";
 import { GestureEstimator } from "fingerPoseEstimator";
 import { useInterval } from "useInterval";
+import { gameReducer, initialState } from "./GameReducer";
+import CustomContext from "./CustomContext";
+import { CountDown } from "./CountDown";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { ScoreBoard } from "./ScoreBoard";
+import { Box, Button, Container } from "@mui/material";
 
 const detectorConfig = {
   runtime: 'tfjs', // or 'tfjs'
@@ -20,8 +26,10 @@ export function RockPaperScissor(){
   const [resultingGesture, setResultingGesture] = useState('');
   const [detector, setDetector] = useState(null);
   const model = handPoseDetection.SupportedModels.MediaPipeHands;
-  
-  const numberOfGestures = 5;
+  const [state, dispatch] = useReducer(gameReducer, initialState);
+  const providerState = {
+    state, dispatch
+  }
   let gestureCount = 0;
   const defaultGestures = {'rock':[],'paper':[], 'scissors':[]};
   let lastGestures = {...defaultGestures};
@@ -37,7 +45,10 @@ useEffect(() => {
 useInterval(async ()=>{
   if (!detector)
     return;
+  
   const hands = await detect(detector);
+  if (!state.currentRound?.captureAction || state.currentRound?.captureFinished)
+    return;
   if (hands?.length > 0){
       
       const gestureEstimations = gestureEstimator.estimate(
@@ -46,29 +57,25 @@ useInterval(async ()=>{
         
         if(gestureEstimations.gestures.length > 0) {
           
-          if (gestureCount < 5){
+          if (gestureCount < 4){
             gestureCount++;
             gestureEstimations.gestures.map(x =>{
               lastGestures[x.name].push(x.score);
             })
           } else {
             const g = getMostLikely(lastGestures);
-            console.log("last gestures:",lastGestures);
+            //console.log("last gestures:",lastGestures);
             setResultingGesture(g);
             gestureCount = 0;
             lastGestures = {'rock':[],'paper':[], 'scissors':[]};
-            console.log("resulting gesture:",g);
+            dispatch({type:'make-move',payload:{move:g}})
+            //console.log("resulting gesture:",g);
             
           }
-          // 3. extract gesture with highest match score
-          const gestureResult = gestureEstimations.gestures.reduce(
-            (p, c) => { return (p.score > c.score) ? p : c; }
-          );
-          //console.log("gesture:", gestureResult.name);
-          return gestureResult.name;
+          
         }
   }
-}, 100)
+}, 20)
 const getMostLikely  = list => {
   let best = 'rock';
   const sum = arr => arr.reduce((a, b) => a + b, 0)
@@ -112,11 +119,15 @@ const detect = async (net) => {
         return hand;
     }
   };
+  
 
 
-
-    return <>
-        <h4>Rock paper scissors</h4>
+    return <CustomContext.Provider value={providerState} >
+        
+        <Container>
+        {!state.started && <Button onClick={() => dispatch({type:'start'})}>Start game</Button>}
+        <Box display="flex" direction="row" justifyContent="space-between" alignItems="center">
+        
         <div style={{width:640,height:480}}>
         <Webcam
           ref={webcamRef}
@@ -148,6 +159,10 @@ const detect = async (net) => {
           }}
         />
         </div>
-        <h6 >Result: {resultingGesture}</h6>
-    </>
+        <div><CountDown></CountDown></div>
+        </Box>
+        
+        <ScoreBoard></ScoreBoard>
+        </Container>
+    </CustomContext.Provider>
 }

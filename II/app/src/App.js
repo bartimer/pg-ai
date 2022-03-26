@@ -12,6 +12,10 @@ import { Branch } from './Branch';
 import { QueryClient, QueryClientProvider } from 'react-query'
 import { ReactComponent as Architecture } from './assets/IOT-assigment.svg';
 import { IIContainer } from 'intelligent-interfaces/IIContainer';
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faHand, faHandBackFist, faHandScissors, faMedal, fas } from '@fortawesome/free-solid-svg-icons';
+
+library.add(fas, faHandScissors, faHandBackFist, faHand, faMedal)
 function Home() {
 
   return <div>
