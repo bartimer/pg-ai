@@ -125,7 +125,7 @@ const detect = async (net) => {
     return <CustomContext.Provider value={providerState} >
         
         <Container>
-        {!state.started && <Button onClick={() => dispatch({type:'start'})}>Start game</Button>}
+        {(!state.started || state.finished) && <Button onClick={() => dispatch({type:'start'})}>Start game</Button>}
         <Box display="flex" direction="row" justifyContent="space-between" alignItems="center">
         
         <div style={{width:640,height:480}}>

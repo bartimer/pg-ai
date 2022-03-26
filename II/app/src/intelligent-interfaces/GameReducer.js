@@ -42,9 +42,9 @@ export function gameReducer(state, action){
 
     switch (action.type) {
         case 'start':
-            return {...state, started:true, rounds:[],computerWins:0, playerWins:0, currentRound: {...round}};
+            return {...state, numberOfRounds:5,started:true, finished:false, rounds:[],computerWins:0, playerWins:0, currentRound: {...round}};
         case 'count-down':
-            if (state.currentRound?.countDown === 0)
+            if (state.currentRound?.countDown === 0 || state.finished)
                 return state;
             const newCount = state.currentRound?.countDown -1;
             return {...state, currentRound:{...state.currentRound, countDown: newCount, captureAction: newCount === 0}};
@@ -53,10 +53,12 @@ export function gameReducer(state, action){
                 
                 return {...state, currentRound:{...round}, };
             }
+            if (state.finished)
+                return state;
             const timeBeforeNextRound = state.currentRound?.timeBeforeNextRound -1;
             return {...state, currentRound:{...state.currentRound, timeBeforeNextRound: timeBeforeNextRound}};
         case 'make-move':
-            if (state.currentRound?.captureFinished)
+            if (state.currentRound?.captureFinished || state.finished)
                 return state;
             
             const computerMove = makeMove()
@@ -79,9 +81,10 @@ export function gameReducer(state, action){
                     playerWins +=1;
             
             }
+            
             console.log(`Wins computer: ${computerWins}, player:${playerWins}`)
             return {...state, 
-                currentRound:currentRound,rounds:rounds, computerWins: computerWins, playerWins:playerWins};
+                currentRound:currentRound,rounds:rounds, computerWins: computerWins, playerWins:playerWins, finished: rounds.length === state.numberOfRounds};
         
     }
 }
