@@ -7,7 +7,7 @@ const fingerJoints = {
   };
 
 export const drawHand = (hands, ctx) => {
-    // Check if we have predictions
+  // Check if we have predictions
     if (hands.length > 0) {
       // Loop through each prediction
       hands.forEach((prediction) => {
@@ -23,6 +23,7 @@ export const drawHand = (hands, ctx) => {
   
             // Draw path
             ctx.beginPath();
+            
             ctx.moveTo(
               landmarks[firstJointIndex].x,
               landmarks[firstJointIndex].y

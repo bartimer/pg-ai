@@ -16,7 +16,11 @@ export function CountDown(){
 if (!state.started) 
     return <></>
 if (state.finished) 
-    return <><h3>End of game</h3></>
+    return <>
+    {state.computerWins < state.playerWins && <h3>Congrats! You won with {state.playerWins} - {state.computerWins}</h3>}
+    {state.computerWins > state.playerWins && <h3>Aarghh! The computer won with {state.computerWins} - {state.playerWins}</h3>}
+    <h3>The end</h3>
+    </>
 if (state.currentRound?.captureFinished) 
     return <>
     <h3>Next round in <b>{state.currentRound?.timeBeforeNextRound}</b> sec.</h3>

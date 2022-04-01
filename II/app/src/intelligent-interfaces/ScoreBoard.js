@@ -21,7 +21,7 @@ if (!state.started) return <></>
 return <div>
 <Box display="flex" justifyContent="flex-start" flexDirection="column" alignItems="center" p={3}>
 
-    <Box display="flex" justifyContent="space-evenly" flexDirection="row" width="100%" p={3}>
+    <Box display="flex" justifyContent="space-between" flexDirection="row" width="100%" p={3}>
     <Box>
         <Stack>
         <Typography variant="h5">Computer</Typography>

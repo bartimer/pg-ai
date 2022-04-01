@@ -109,7 +109,7 @@ const detect = async (net) => {
       canvasRef.current.height = videoHeight;
     }
       // Make Detections
-      const hand = await net.estimateHands(video,{flipHorizontal:false});
+      const hand = await net.estimateHands(video,{flipHorizontal:true});
       //console.log(hand);
 
       // Draw mesh
@@ -128,9 +128,10 @@ const detect = async (net) => {
         {(!state.started || state.finished) && <Button onClick={() => dispatch({type:'start'})}>Start game</Button>}
         <Box display="flex" direction="row" justifyContent="space-between" alignItems="center">
         
-        <div style={{width:640,height:480}}>
+        <div style={{width:640,height:480,position:'relative'}}>
         <Webcam
           ref={webcamRef}
+          mirrored={true}
           style={{
             position: "absolute",
             marginLeft: "auto",
