@@ -42,7 +42,10 @@ export function gameReducer(state, action){
 
     switch (action.type) {
         case 'start':
-            return {...state, numberOfRounds:5,started:true, finished:false, rounds:[],computerWins:0, playerWins:0, currentRound: {...round}};
+            return {...state, numberOfRounds:5,wantsToPlay:true, started:false, finished:false, rounds:[],computerWins:0, playerWins:0, currentRound: {...round}};
+        case 'change-number-of-rounds':
+                return {...state, numberOfRounds:action.payload.numberOfRounds,started:true,wantsToPlay:false};
+           
         case 'count-down':
             if (state.currentRound?.countDown === 0 || state.finished)
                 return state;
@@ -83,8 +86,9 @@ export function gameReducer(state, action){
             }
             
             console.log(`Wins computer: ${computerWins}, player:${playerWins}`)
+            const finished = computerWins === state.numberOfRounds || playerWins === state.numberOfRounds
             return {...state, 
-                currentRound:currentRound,rounds:rounds, computerWins: computerWins, playerWins:playerWins, finished: rounds.length === state.numberOfRounds};
+                currentRound:currentRound,rounds:rounds, computerWins: computerWins, playerWins:playerWins, finished: finished};
         
     }
 }
