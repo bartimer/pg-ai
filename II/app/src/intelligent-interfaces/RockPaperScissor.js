@@ -13,6 +13,7 @@ import { CountDown } from "./CountDown";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ScoreBoard } from "./ScoreBoard";
 import { Box, Button, Container } from "@mui/material";
+import * as faceapi from '@vladmandic/face-api';
 
 const detectorConfig = {
   runtime: 'tfjs', // or 'tfjs'
@@ -20,11 +21,34 @@ const detectorConfig = {
   maxHands:1
 };
 
+function loadLabeledImages() {
+  const labels = ['Yoeri', 'Els']
+  return Promise.all(
+      labels.map(async label => {
+        const descriptions = []
+        // base_url = "https://raw.githubusercontent.com/WebDevSimplified/Face-Recognition-JavaScript/master/labeled_images/"
+        //base_url = "http://localhost:8000/labeled_images"
+        const img = await faceapi.fetchImage(`${process.env.PUBLIC_URL}/logo192.png`)
+        for (let i = 1; i <= 2; i++) {
+         // console.log(`Loading ${base_url}/${label}/${i}.jpg`)
+          const img = await faceapi.fetchImage(`/labeledimages/${label}/${i}.jpg`)
+          const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor()
+          // console.log(detections.descriptor)
+          descriptions.push(detections.descriptor)
+        }
+
+        return new faceapi.LabeledFaceDescriptors(label, descriptions)
+      })
+  )
+}
+
+
 export function RockPaperScissor(){
     const webcamRef = useRef(null);
   const canvasRef = useRef(null);
   const [resultingGesture, setResultingGesture] = useState('');
   const [detector, setDetector] = useState(null);
+  const [faceMatcher, setFaceMatcher] = useState(null);
   const model = handPoseDetection.SupportedModels.MediaPipeHands;
   const [state, dispatch] = useReducer(gameReducer, initialState);
   const providerState = {
@@ -39,43 +63,92 @@ useEffect(() => {
     const s = await handPoseDetection.createDetector(model, detectorConfig);
     setDetector(s);
   } 
+  const createFaceDescriptors = async() => {
+    Promise.all([
+      faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+      faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+      faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
+      faceapi.nets.ssdMobilenetv1.loadFromUri('/models'),
+      faceapi.nets.faceExpressionNet.loadFromUri('/models')
+    ]).then(async () => {
+      console.log("Start creating Face Descriptors.")
+      const s = await loadLabeledImages();
+      console.log("Created Face Descriptors.")
+      const faceMatcher = new faceapi.FaceMatcher(s, 0.6)
+      setFaceMatcher(faceMatcher);
+      console.log("Created FaceMatcher.")
+    })
+    
+  } 
+  
   createDetector();
+  createFaceDescriptors();
   
 },[])
+// useInterval(async ()=>{
+//   if (!detector)
+//     return;
+  
+//   const hands = await detect(detector);
+//   if (!state.currentRound?.captureAction || state.currentRound?.captureFinished)
+//     return;
+//   if (hands?.length > 0){
+      
+//       const gestureEstimations = gestureEstimator.estimate(
+//           hands[0].keypoints3D, 0.5
+//         );
+        
+//         if(gestureEstimations.gestures.length > 0) {
+          
+//           if (gestureCount < 4){
+//             gestureCount++;
+//             gestureEstimations.gestures.map(x =>{
+//               lastGestures[x.name].push(x.score);
+//             })
+//           } else {
+//             const g = getMostLikely(lastGestures);
+//             //console.log("last gestures:",lastGestures);
+//             setResultingGesture(g);
+//             gestureCount = 0;
+//             lastGestures = {'rock':[],'paper':[], 'scissors':[]};
+//             dispatch({type:'make-move',payload:{move:g}})
+//             //console.log("resulting gesture:",g);
+            
+//           }
+          
+//         }
+//   }
+// }, 20)
 useInterval(async ()=>{
-  if (!detector)
+  if (!faceMatcher || !webcamRef?.current?.video)
     return;
   
-  const hands = await detect(detector);
-  if (!state.currentRound?.captureAction || state.currentRound?.captureFinished)
-    return;
-  if (hands?.length > 0){
+    const displaySize = {width:webcamRef.current.video.videoWidth, height:webcamRef.current.video.videoHeight};
+    // const detection = await faceapi.detectSingleFace(webcamRef.current.video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions()
+    // const resizedDetections = faceapi.resizeResults(detection, displaySize)
+    faceapi.matchDimensions(canvasRef.current, displaySize)
+    canvasRef.current.getContext('2d').clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
+    //faceapi.draw.drawDetections(canvasRef.current, resizedDetections)
+    //faceapi.draw.drawFaceLandmarks(canvasRef.current, resizedDetections)
+    //faceapi.draw.drawFaceExpressions(canvasRef.current, resizedDetections)
+
+    // clear previous bounding boxes
+    //canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
+
+    const detection = await faceapi.detectAllFaces(webcamRef.current.video).withFaceLandmarks().withFaceDescriptors()
+    //console.log(detections2)
+    const resizedDetection = faceapi.resizeResults(detection, displaySize)
+    console.log(resizedDetection)
+    const results = resizedDetection.map(d => faceMatcher.findBestMatch(d.descriptor))
       
-      const gestureEstimations = gestureEstimator.estimate(
-          hands[0].keypoints3D, 0.5
-        );
-        
-        if(gestureEstimations.gestures.length > 0) {
-          
-          if (gestureCount < 4){
-            gestureCount++;
-            gestureEstimations.gestures.map(x =>{
-              lastGestures[x.name].push(x.score);
-            })
-          } else {
-            const g = getMostLikely(lastGestures);
-            //console.log("last gestures:",lastGestures);
-            setResultingGesture(g);
-            gestureCount = 0;
-            lastGestures = {'rock':[],'paper':[], 'scissors':[]};
-            dispatch({type:'make-move',payload:{move:g}})
-            //console.log("resulting gesture:",g);
-            
-          }
-          
-        }
-  }
-}, 20)
+    results.forEach((result, i) => {
+      let box = resizedDetection[i].detection.box
+      box = box.shift(-(box.x -(displaySize.width-box.x- box.width)),0)
+      const drawBox = new faceapi.draw.DrawBox(box, { label: result.toString() })
+      drawBox.draw(canvasRef.current)
+    })
+},1000)
+
 const getMostLikely  = list => {
   let best = 'rock';
   const sum = arr => arr.reduce((a, b) => a + b, 0)
