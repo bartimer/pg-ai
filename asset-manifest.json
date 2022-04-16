@@ -1,0 +1,19 @@
+{
+  "files": {
+    "main.css": "/pg-ai/static/css/main.074dc82b.css",
+    "main.js": "/pg-ai/static/js/main.30bcc6e4.js",
+    "static/js/787.c1112931.chunk.js": "/pg-ai/static/js/787.c1112931.chunk.js",
+    "static/media/me.png": "/pg-ai/static/media/me.b61cf2bfc1308414c623.png",
+    "static/media/IOT-assigment.svg": "/pg-ai/static/media/IOT-assigment.d223a6d34de9cb6e53a7df69972cdb9e.svg",
+    "static/media/layout.svg": "/pg-ai/static/media/layout.bf9595f36c3c84f0bf57.svg",
+    "static/media/logo-ehb-small.svg": "/pg-ai/static/media/logo-ehb-small.167aad4daa0b080e4cc6720153a7ad6b.svg",
+    "index.html": "/pg-ai/index.html",
+    "main.074dc82b.css.map": "/pg-ai/static/css/main.074dc82b.css.map",
+    "main.30bcc6e4.js.map": "/pg-ai/static/js/main.30bcc6e4.js.map",
+    "787.c1112931.chunk.js.map": "/pg-ai/static/js/787.c1112931.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.074dc82b.css",
+    "static/js/main.30bcc6e4.js"
+  ]
+}
