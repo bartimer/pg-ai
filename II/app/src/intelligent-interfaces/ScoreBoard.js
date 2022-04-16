@@ -17,7 +17,7 @@ export function MoveIcon(props){
 export function ScoreBoard(){
  const {state, dispatch} = useCustomContext()
  
-if (!state.started) return <></>
+if (!state.gameState.isStarted()) return <></>
 return <div>
 <Box display="flex" justifyContent="flex-start" flexDirection="column" alignItems="center" p={3}>
 

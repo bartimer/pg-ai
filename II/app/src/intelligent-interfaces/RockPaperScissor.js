@@ -12,7 +12,7 @@ import CustomContext from "./CustomContext";
 import { CountDown } from "./CountDown";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ScoreBoard } from "./ScoreBoard";
-import { Box, Button, Container } from "@mui/material";
+import { Box, Button, Container, Typography } from "@mui/material";
 import * as faceapi from '@vladmandic/face-api';
 
 const detectorConfig = {
@@ -22,7 +22,7 @@ const detectorConfig = {
 };
 
 function loadLabeledImages() {
-  const labels = ['Yoeri', 'Els']
+  const labels = ['Yoeri', 'Els','Bart']
   return Promise.all(
       labels.map(async label => {
         const descriptions = []
@@ -85,69 +85,63 @@ useEffect(() => {
   createFaceDescriptors();
   
 },[])
-// useInterval(async ()=>{
-//   if (!detector)
-//     return;
+useInterval(async ()=>{
+  if (!detector)
+    return;
   
-//   const hands = await detect(detector);
-//   if (!state.currentRound?.captureAction || state.currentRound?.captureFinished)
-//     return;
-//   if (hands?.length > 0){
+  const hands = await detect(detector);
+  if (!state.currentRound?.captureAction || state.currentRound?.captureFinished)
+    return;
+  if (hands?.length > 0){
       
-//       const gestureEstimations = gestureEstimator.estimate(
-//           hands[0].keypoints3D, 0.5
-//         );
+      const gestureEstimations = gestureEstimator.estimate(
+          hands[0].keypoints3D, 0.5
+        );
         
-//         if(gestureEstimations.gestures.length > 0) {
+        if(gestureEstimations.gestures.length > 0) {
           
-//           if (gestureCount < 4){
-//             gestureCount++;
-//             gestureEstimations.gestures.map(x =>{
-//               lastGestures[x.name].push(x.score);
-//             })
-//           } else {
-//             const g = getMostLikely(lastGestures);
-//             //console.log("last gestures:",lastGestures);
-//             setResultingGesture(g);
-//             gestureCount = 0;
-//             lastGestures = {'rock':[],'paper':[], 'scissors':[]};
-//             dispatch({type:'make-move',payload:{move:g}})
-//             //console.log("resulting gesture:",g);
+          if (gestureCount < 4){
+            gestureCount++;
+            gestureEstimations.gestures.map(x =>{
+              lastGestures[x.name].push(x.score);
+            })
+          } else {
+            const g = getMostLikely(lastGestures);
+            //console.log("last gestures:",lastGestures);
+            setResultingGesture(g);
+            gestureCount = 0;
+            lastGestures = {'rock':[],'paper':[], 'scissors':[]};
+            dispatch({type:'make-move',payload:{move:g}})
+            //console.log("resulting gesture:",g);
             
-//           }
+          }
           
-//         }
-//   }
-// }, 20)
+        }
+  }
+}, state.handRecognitionInterval)
 useInterval(async ()=>{
   if (!faceMatcher || !webcamRef?.current?.video)
     return;
-  
     const displaySize = {width:webcamRef.current.video.videoWidth, height:webcamRef.current.video.videoHeight};
-    // const detection = await faceapi.detectSingleFace(webcamRef.current.video, new faceapi.TinyFaceDetectorOptions()).withFaceLandmarks().withFaceExpressions()
-    // const resizedDetections = faceapi.resizeResults(detection, displaySize)
-    faceapi.matchDimensions(canvasRef.current, displaySize)
-    canvasRef.current.getContext('2d').clearRect(0, 0, canvasRef.current.width, canvasRef.current.height)
-    //faceapi.draw.drawDetections(canvasRef.current, resizedDetections)
-    //faceapi.draw.drawFaceLandmarks(canvasRef.current, resizedDetections)
-    //faceapi.draw.drawFaceExpressions(canvasRef.current, resizedDetections)
-
-    // clear previous bounding boxes
-    //canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
-
-    const detection = await faceapi.detectAllFaces(webcamRef.current.video).withFaceLandmarks().withFaceDescriptors()
-    //console.log(detections2)
-    const resizedDetection = faceapi.resizeResults(detection, displaySize)
-    console.log(resizedDetection)
-    const results = resizedDetection.map(d => faceMatcher.findBestMatch(d.descriptor))
-      
-    results.forEach((result, i) => {
-      let box = resizedDetection[i].detection.box
-      box = box.shift(-(box.x -(displaySize.width-box.x- box.width)),0)
-      const drawBox = new faceapi.draw.DrawBox(box, { label: result.toString() })
-      drawBox.draw(canvasRef.current)
-    })
-},1000)
+    faceapi.matchDimensions(canvasRef.current, displaySize);
+    
+    const detection = await faceapi.detectSingleFace(webcamRef.current.video).withFaceLandmarks().withFaceDescriptor();
+    if (!detection){
+      dispatch({type:'change-detected-face',payload:{face:null}});
+      canvasRef.current.getContext('2d').clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+      return;
+    }
+    
+    const resizedDetection = faceapi.resizeResults(detection, displaySize);
+    const bestMatch = faceMatcher.findBestMatch(detection.descriptor);
+    let box = resizedDetection.detection.box;
+    box = box.shift(-(box.x -(displaySize.width-box.x- box.width)),0);
+    const drawBox = new faceapi.draw.DrawBox(box, { label: bestMatch.toString() });
+    canvasRef.current.getContext('2d').clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    drawBox.draw(canvasRef.current);
+    dispatch({type:'change-detected-face',payload:{face:bestMatch.label}});
+    
+},state.faceRecognitionInterval)
 
 const getMostLikely  = list => {
   let best = 'rock';
@@ -198,8 +192,16 @@ const detect = async (net) => {
     return <CustomContext.Provider value={providerState} >
         
         <Container>
-        {((!state.started && !state.wantsToPlay) || state.finished) && <Button onClick={() => dispatch({type:'start'})}>Start game</Button>}
-        {(state.wantsToPlay) && <Button onClick={() => dispatch({type:'change-number-of-rounds', payload:{numberOfRounds:3}})}>Change number of rounds to 3</Button>}
+        {
+        ((state.gameState.isIdle()||state.gameState.isFinished()) && !state.faceDetected) && <>
+        <Typography>Waiting for a playing buddy....</Typography>
+        </>
+        }
+        {((state.gameState.isIdle()||state.gameState.isFinished()) && state.faceDetected) && <>
+          
+          <Button onClick={() => dispatch({type:'start'})}>Hello {state.faceDetected === 'unknown' ?  'stranger' :state.faceDetected }, Want to play a game?</Button>
+        </>}
+        {(state.gameState.isWantsToPlay()) && <Button onClick={() => dispatch({type:'change-number-of-rounds', payload:{numberOfRounds:3}})}>Change number of rounds to 3</Button>}
         
         <Box display="flex" direction="row" justifyContent="space-between" alignItems="center">
         

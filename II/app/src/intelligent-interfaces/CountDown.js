@@ -6,21 +6,22 @@ import { useCustomContext } from "./CustomContext";
 export function CountDown(){
  const {state, dispatch} = useCustomContext()
  useInterval(()=>{
-     if (state.started)
+     if (state.gameState.isStarted())
      dispatch({type:'count-down'});
  },1000)
  useInterval(()=>{
-    if (state.started && state.currentRound?.captureFinished)
+    if (state.gameState.isStarted() && state.currentRound?.captureFinished)
     dispatch({type:'count-down-in-between'});
 },1000)
-if (!state.started) 
-    return <></>
-if (state.finished) 
+
+if (state.gameState.isFinished()) 
     return <>
     {state.computerWins < state.playerWins && <h3>Congrats! You won with {state.playerWins} - {state.computerWins}</h3>}
     {state.computerWins > state.playerWins && <h3>Aarghh! The computer won with {state.computerWins} - {state.playerWins}</h3>}
     <h3>The end</h3>
     </>
+if (!state.gameState.isStarted()) 
+    return <></>
 if (state.currentRound?.captureFinished) 
     return <>
     <h3>Next round in <b>{state.currentRound?.timeBeforeNextRound}</b> sec.</h3>
