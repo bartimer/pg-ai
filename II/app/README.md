@@ -13,6 +13,10 @@ Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
 The page will reload when you make changes.\
 You may also see any lint errors in the console.
 
+### Important
+Add the following to node_modules\@tensorflow-models\speech-commands\package.json
+`"browser": { "fs": false, "path": false, "os": false}` to remove fs errors (caused by webpack 5)
+
 ### `npm run build`
 
 Builds the app for production to the `build` folder.\
