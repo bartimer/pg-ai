@@ -10,10 +10,10 @@ import { useInterval } from "useInterval";
 import { gameReducer, initialState } from "./GameReducer";
 import CustomContext from "./CustomContext";
 import { CountDown } from "./CountDown";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { ScoreBoard } from "./ScoreBoard";
 import { Box, Button, Container, Typography } from "@mui/material";
 import * as faceapi from '@vladmandic/face-api';
+import * as speech from "@tensorflow-models/speech-commands"
 
 const detectorConfig = {
   runtime: 'tfjs', // or 'tfjs'
@@ -26,8 +26,6 @@ function loadLabeledImages() {
   return Promise.all(
       labels.map(async label => {
         const descriptions = []
-        // base_url = "https://raw.githubusercontent.com/WebDevSimplified/Face-Recognition-JavaScript/master/labeled_images/"
-        //base_url = "http://localhost:8000/labeled_images"
         const img = await faceapi.fetchImage(`${process.env.PUBLIC_URL}/logo192.png`)
         for (let i = 1; i <= 2; i++) {
          // console.log(`Loading ${base_url}/${label}/${i}.jpg`)
@@ -51,6 +49,9 @@ export function RockPaperScissor(){
   const [faceMatcher, setFaceMatcher] = useState(null);
   const model = handPoseDetection.SupportedModels.MediaPipeHands;
   const [state, dispatch] = useReducer(gameReducer, initialState);
+  const [speechModel, setSpeechModel] = useState(null)
+const [action, setAction] = useState(null)
+const [labels, setLabels] = useState(null) 
   const providerState = {
     state, dispatch
   }
@@ -58,31 +59,44 @@ export function RockPaperScissor(){
   const defaultGestures = {'rock':[],'paper':[], 'scissors':[]};
   let lastGestures = {...defaultGestures};
   const gestureEstimator = new GestureEstimator(gestures);  
+ 
+
+// 2. Create Recognizer
+const createSpeechModel = async () =>{
+  const recognizer = await speech.create("BROWSER_FFT")
+  console.log('Model Loaded')
+  await recognizer.ensureModelLoaded();
+  console.log(recognizer.wordLabels())
+  setSpeechModel(recognizer)
+  setLabels(recognizer.wordLabels())
+}
+const createDetector = async() => {
+  const s = await handPoseDetection.createDetector(model, detectorConfig);
+  setDetector(s);
+} 
+const createFaceDescriptors = async() => {
+  Promise.all([
+    faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
+    faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
+    faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
+    faceapi.nets.ssdMobilenetv1.loadFromUri('/models'),
+    faceapi.nets.faceExpressionNet.loadFromUri('/models')
+  ]).then(async () => {
+    console.log("Start creating Face Descriptors.")
+    const s = await loadLabeledImages();
+    console.log("Created Face Descriptors.")
+    const faceMatcher = new faceapi.FaceMatcher(s, 0.6)
+    setFaceMatcher(faceMatcher);
+    console.log("Created FaceMatcher.")
+  })
+  
+} 
 useEffect(() => {
-  const createDetector = async() => {
-    const s = await handPoseDetection.createDetector(model, detectorConfig);
-    setDetector(s);
-  } 
-  const createFaceDescriptors = async() => {
-    Promise.all([
-      faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
-      faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-      faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
-      faceapi.nets.ssdMobilenetv1.loadFromUri('/models'),
-      faceapi.nets.faceExpressionNet.loadFromUri('/models')
-    ]).then(async () => {
-      console.log("Start creating Face Descriptors.")
-      const s = await loadLabeledImages();
-      console.log("Created Face Descriptors.")
-      const faceMatcher = new faceapi.FaceMatcher(s, 0.6)
-      setFaceMatcher(faceMatcher);
-      console.log("Created FaceMatcher.")
-    })
-    
-  } 
+  
   
   createDetector();
   createFaceDescriptors();
+  createSpeechModel();
   
 },[])
 useInterval(async ()=>{
@@ -119,6 +133,20 @@ useInterval(async ()=>{
         }
   }
 }, state.handRecognitionInterval)
+
+function argMax(arr){
+  return arr.map((x, i) => [x, i]).reduce((r, a) => (a[0] > r[0] ? a : r))[1];
+}
+
+const recognizeCommands = async () =>{
+  console.log('Listening for commands')
+  speechModel.listen(result=>{
+    console.log(labels[argMax(Object.values(result.scores))])
+    //console.log(result)
+    setAction(labels[argMax(Object.values(result.scores))])
+  }, {includeSpectrogram:true, probabilityThreshold:0.9})
+  setTimeout(()=>speechModel.stopListening(), 25*1000)
+}
 useInterval(async ()=>{
   if (!faceMatcher || !webcamRef?.current?.video)
     return;
@@ -202,7 +230,7 @@ const detect = async (net) => {
           <Button onClick={() => dispatch({type:'start'})}>Hello {state.faceDetected === 'unknown' ?  'stranger' :state.faceDetected }, Want to play a game?</Button>
         </>}
         {(state.gameState.isWantsToPlay()) && <Button onClick={() => dispatch({type:'change-number-of-rounds', payload:{numberOfRounds:3}})}>Change number of rounds to 3</Button>}
-        
+        <Button onClick={() => recognizeCommands()}>Start voice</Button>
         <Box display="flex" direction="row" justifyContent="space-between" alignItems="center">
         
         <div style={{width:640,height:480,position:'relative'}}>
