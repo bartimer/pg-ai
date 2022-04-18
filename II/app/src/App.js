@@ -44,15 +44,15 @@ function App() {
           <ResponsiveAppBar></ResponsiveAppBar>
           <Container maxWidth="lg">
             <Routes>
-              <Route path="/branch" element={<Branch />}>
+              <Route path="branch" element={<Branch />}>
               </Route>
-              <Route path="/intelligent-interfaces" element={<IIContainer />}>
-              </Route>
-
-              <Route path="/sensors/:id" element={<SensorPage />}>
+              <Route path="intelligent-interfaces" element={<IIContainer />}>
               </Route>
 
-              <Route path="/" element={<Home />}>
+              <Route path="sensors/:id" element={<SensorPage />}>
+              </Route>
+
+              <Route path="" element={<Home />}>
               </Route>
             </Routes>
           </Container>

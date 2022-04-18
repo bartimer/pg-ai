@@ -29,7 +29,7 @@ function loadLabeledImages() {
         const img = await faceapi.fetchImage(`${process.env.PUBLIC_URL}/logo192.png`)
         for (let i = 1; i <= 2; i++) {
          // console.log(`Loading ${base_url}/${label}/${i}.jpg`)
-          const img = await faceapi.fetchImage(`/labeledimages/${label}/${i}.jpg`)
+          const img = await faceapi.fetchImage(`${process.env.PUBLIC_URL}/labeledimages/${label}/${i}.jpg`)
           const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor()
           // console.log(detections.descriptor)
           descriptions.push(detections.descriptor)
@@ -76,11 +76,11 @@ const createDetector = async() => {
 } 
 const createFaceDescriptors = async() => {
   Promise.all([
-    faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
-    faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
-    faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
-    faceapi.nets.ssdMobilenetv1.loadFromUri('/models'),
-    faceapi.nets.faceExpressionNet.loadFromUri('/models')
+    faceapi.nets.tinyFaceDetector.loadFromUri(`${process.env.PUBLIC_URL}/models`),
+    faceapi.nets.faceLandmark68Net.loadFromUri(`${process.env.PUBLIC_URL}/models`),
+    faceapi.nets.faceRecognitionNet.loadFromUri(`${process.env.PUBLIC_URL}/models`),
+    faceapi.nets.ssdMobilenetv1.loadFromUri(`${process.env.PUBLIC_URL}/models`),
+    faceapi.nets.faceExpressionNet.loadFromUri(`${process.env.PUBLIC_URL}/models`)
   ]).then(async () => {
     console.log("Start creating Face Descriptors.")
     const s = await loadLabeledImages();
@@ -147,6 +147,7 @@ const recognizeCommands = async () =>{
   }, {includeSpectrogram:true, probabilityThreshold:0.9})
   setTimeout(()=>speechModel.stopListening(), 25*1000)
 }
+
 useInterval(async ()=>{
   if (!faceMatcher || !webcamRef?.current?.video)
     return;
