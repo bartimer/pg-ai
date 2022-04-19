@@ -241,7 +241,7 @@ const detect = async (net) => {
         <Webcam
           ref={webcamRef}
           mirrored={true}
-          videoConstraints={{width:small ? 400 : 640, height: small ? 300 :480}}
+          videoConstraints={{width:small ? 400 : 640, height: small ? 300 :480, facingMode:'user'}}
           style={{
             position: "absolute",
             marginLeft: "auto",
