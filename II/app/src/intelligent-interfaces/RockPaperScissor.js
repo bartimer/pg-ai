@@ -11,7 +11,7 @@ import { gameReducer, initialState } from "./GameReducer";
 import CustomContext from "./CustomContext";
 import { CountDown } from "./CountDown";
 import { ScoreBoard } from "./ScoreBoard";
-import { Box, Button, Container, Typography } from "@mui/material";
+import { Box, Button, Container, Stack, Typography, useMediaQuery, useTheme } from "@mui/material";
 import * as faceapi from '@vladmandic/face-api';
 import * as speech from "@tensorflow-models/speech-commands"
 
@@ -49,6 +49,8 @@ export function RockPaperScissor(){
   const [faceMatcher, setFaceMatcher] = useState(null);
   const model = handPoseDetection.SupportedModels.MediaPipeHands;
   const [state, dispatch] = useReducer(gameReducer, initialState);
+  const theme = useTheme();
+  const small = useMediaQuery(theme.breakpoints.down('sm'));
   const [speechModel, setSpeechModel] = useState(null)
 const [action, setAction] = useState(null)
 const [labels, setLabels] = useState(null) 
@@ -194,7 +196,7 @@ const detect = async (net) => {
       const video = webcamRef.current.video;
       const videoWidth = webcamRef.current.video.videoWidth;
       const videoHeight = webcamRef.current.video.videoHeight;
-
+     
       // Set video width
       webcamRef.current.video.width = videoWidth;
       webcamRef.current.video.height = videoHeight;
@@ -232,12 +234,14 @@ const detect = async (net) => {
         </>}
         {(state.gameState.isWantsToPlay()) && <Button onClick={() => dispatch({type:'change-number-of-rounds', payload:{numberOfRounds:3}})}>Change number of rounds to 3</Button>}
         <Button onClick={() => recognizeCommands()}>Start voice</Button>
-        <Box display="flex" direction="row" justifyContent="space-between" alignItems="center">
-        
-        <div style={{width:640,height:480,position:'relative'}}>
+        <Stack>
+        <Box textAlign="center"><CountDown></CountDown></Box>
+        <ScoreBoard></ScoreBoard>
+        <div style={{position:'relative'}}>
         <Webcam
           ref={webcamRef}
           mirrored={true}
+          videoConstraints={{width:small ? 400 : 640, height: small ? 300 :480}}
           style={{
             position: "absolute",
             marginLeft: "auto",
@@ -246,8 +250,8 @@ const detect = async (net) => {
             right: 0,
             textAlign: "center",
             zIndex: 9,
-            width: 640,
-            height: 480,
+            width: small ? 400 : 640,
+            height: small ? 300 :480,
           }}
         />
 
@@ -261,15 +265,15 @@ const detect = async (net) => {
             right: 0,
             textAlign: "center",
             zIndex: 9,
-            width: 640,
-            height: 480,
+            width: small ? 400 : 640,
+            height: small ? 300 :480,
           }}
         />
         </div>
-        <div><CountDown></CountDown></div>
-        </Box>
         
-        <ScoreBoard></ScoreBoard>
+        </Stack>
+        
+        
         </Container>
     </CustomContext.Provider>
 }

@@ -16,7 +16,6 @@ import { ReactComponent as Logo } from './assets/logo-ehb-small.svg';
 import me from './assets/me.png'
 
 const pages = [{ label: 'Branches', link: '/branch' }, { label: 'Intelligent Interfaces', link: '/intelligent-interfaces' }];
-const settings = ['Account', 'Dashboard', 'Logout'];
 
 const ResponsiveAppBar = () => {
   const [anchorElNav, setAnchorElNav] = React.useState(null);
@@ -38,7 +37,8 @@ const ResponsiveAppBar = () => {
   };
 
   return (
-    <AppBar position="static">
+    <Box sx={{ flexGrow: 1 }}>
+    <AppBar position='static'>
       <Container maxWidth="xl">
         <Toolbar disableGutters>
           <Typography
@@ -55,7 +55,7 @@ const ResponsiveAppBar = () => {
           <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
             <IconButton
               size="large"
-              aria-label="account of current user"
+              aria-label="My account"
               aria-controls="menu-appbar"
               aria-haspopup="true"
               onClick={handleOpenNavMenu}
@@ -82,7 +82,7 @@ const ResponsiveAppBar = () => {
               }}
             >
               {pages.map((page) => (
-                <MenuItem key={page.label} onClick={handleCloseNavMenu}>
+                <MenuItem key={page.label} onClick={handleCloseNavMenu} component={RouterLink} to={page.link}>
                   <Typography textAlign="center">{page.label}</Typography>
                 </MenuItem>
               ))}
@@ -106,39 +106,10 @@ const ResponsiveAppBar = () => {
               </Button>
             ))}
           </Box>
-
-          <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar alt="Bart" src={me} />
-              </IconButton>
-            </Tooltip>
-            <Menu
-              sx={{ mt: '45px' }}
-              id="menu-appbar"
-              anchorEl={anchorElUser}
-              anchorOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right',
-              }}
-              open={Boolean(anchorElUser)}
-              onClose={handleCloseUserMenu}
-            >
-              {settings.map((setting) => (
-                <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                  <Typography textAlign="center">{setting}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
         </Toolbar>
       </Container>
     </AppBar>
+    </Box>
   );
 };
 export default ResponsiveAppBar;

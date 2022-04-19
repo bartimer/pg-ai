@@ -10,9 +10,8 @@ RockGesture.addCurl(fp.Finger.Middle, fp.FingerCurl.FullCurl);
 RockGesture.addCurl(fp.Finger.Ring, fp.FingerCurl.FullCurl);
 RockGesture.addCurl(fp.Finger.Pinky, fp.FingerCurl.FullCurl);
 
-// thumb can be either stretched out or half curled
 RockGesture.addCurl(fp.Finger.Thumb, fp.FingerCurl.HalfCurl);
-RockGesture.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl);
+//RockGesture.addCurl(fp.Finger.Thumb, fp.FingerCurl.NoCurl);
 
 const PaperGesture = new fp.GestureDescription('paper');
 PaperGesture.addCurl(fp.Finger.Index, fp.FingerCurl.NoCurl);
@@ -30,10 +29,10 @@ ScissorsGesture.addCurl(fp.Finger.Middle, fp.FingerCurl.NoCurl);
 
 // ring: curled
 ScissorsGesture.addCurl(fp.Finger.Ring, fp.FingerCurl.FullCurl);
-ScissorsGesture.addCurl(fp.Finger.Ring, fp.FingerCurl.HalfCurl);
+//ScissorsGesture.addCurl(fp.Finger.Ring, fp.FingerCurl.HalfCurl);
 
 // pinky: curled
 ScissorsGesture.addCurl(fp.Finger.Pinky, fp.FingerCurl.FullCurl);
-ScissorsGesture.addCurl(fp.Finger.Pinky, fp.FingerCurl.HalfCurl);
+//ScissorsGesture.addCurl(fp.Finger.Pinky, fp.FingerCurl.HalfCurl);
 
 export const gestures = [RockGesture, PaperGesture, ScissorsGesture];

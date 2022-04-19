@@ -38,11 +38,11 @@ const queryClient = new QueryClient()
 
 function App() {
   return (
+    
     <QueryClientProvider client={queryClient}>
       <Router>
-        <div>
           <ResponsiveAppBar></ResponsiveAppBar>
-          <Container maxWidth="lg">
+          <Container minWidth="sm" maxWidth="lg">
             <Routes>
               <Route path="branch" element={<Branch />}>
               </Route>
@@ -56,10 +56,10 @@ function App() {
               </Route>
             </Routes>
           </Container>
-        </div>
+          
       </Router>
     </QueryClientProvider>
-
+    
 
   );
 }
