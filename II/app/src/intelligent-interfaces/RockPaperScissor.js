@@ -22,13 +22,13 @@ const detectorConfig = {
 };
 
 function loadLabeledImages() {
-  const labels = ['Yoeri', 'Els','Bart']
+  const labels = ['Yoeri', 'Bart', 'Johan', 'Padin']
   return Promise.all(
       labels.map(async label => {
+        console.log(`Loading '${label}'`)
         const descriptions = []
         const img = await faceapi.fetchImage(`${process.env.PUBLIC_URL}/logo192.png`)
         for (let i = 1; i <= 2; i++) {
-         // console.log(`Loading ${base_url}/${label}/${i}.jpg`)
           const img = await faceapi.fetchImage(`${process.env.PUBLIC_URL}/labeledimages/${label}/${i}.jpg`)
           const detections = await faceapi.detectSingleFace(img).withFaceLandmarks().withFaceDescriptor()
           // console.log(detections.descriptor)
