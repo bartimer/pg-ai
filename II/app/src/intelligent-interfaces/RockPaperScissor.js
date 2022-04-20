@@ -17,14 +17,15 @@ import * as speech from "@tensorflow-models/speech-commands"
 import { Spinner } from "./Spinner";
 
 const detectorConfig = {
-  runtime: 'tfjs', // or 'tfjs'
+  runtime: 'tfjs', 
   modelType: 'full',
   maxHands: 1
 };
+
 const numberOfRounds = {
   'one': 1,
   'two': 2,
-  'tree': 3,
+  'three': 3,
   'four': 4,
   'five': 5,
   'six': 6,
@@ -34,7 +35,7 @@ const numberOfRounds = {
 };
 
 function loadLabeledImages() {
-  const labels = ['Yoeri', 'Els', 'Bart','Padin','Johan']
+  const labels = ['Yoeri', 'Bart','Padin','Johan']
   return Promise.all(
     labels.map(async label => {
       const descriptions = []
@@ -56,7 +57,6 @@ function loadLabeledImages() {
 export function RockPaperScissor() {
   const webcamRef = useRef(null);
   const canvasRef = useRef(null);
-  const [resultingGesture, setResultingGesture] = useState('');
   const [detector, setDetector] = useState(null);
   const [faceMatcher, setFaceMatcher] = useState(null);
   const model = handPoseDetection.SupportedModels.MediaPipeHands;
@@ -64,7 +64,6 @@ export function RockPaperScissor() {
   const theme = useTheme();
   const small = useMediaQuery(theme.breakpoints.down('sm'));
   const [speechModel, setSpeechModel] = useState(null);
-  const [isInitialState, setIsInitialState] = useState(true)
   const [action, setAction] = useState(null)
   const [labels, setLabels] = useState(null)
   const providerState = {
@@ -138,12 +137,10 @@ export function RockPaperScissor() {
         if (gestureCount < 4) {
           gestureCount++;
           gestureEstimations.gestures.map(x => {
-            lastGestures[x.name].push(x.score);
+            return lastGestures[x.name].push(x.score);
           })
         } else {
           const g = getMostLikely(lastGestures);
-          //console.log("last gestures:",lastGestures);
-          setResultingGesture(g);
           gestureCount = 0;
           lastGestures = { 'rock': [], 'paper': [], 'scissors': [] };
           dispatch({ type: 'make-move', payload: { move: g } })
@@ -249,11 +246,12 @@ export function RockPaperScissor() {
       dispatch({ type: 'start' });
       return;
     }
-    if (state.gameState.isWantsToPlay() && Object.keys(numberOfRounds).includes(action) > -1) {
+    if (state.gameState.isWantsToPlay() && Object.keys(numberOfRounds).includes(action)) {
       dispatch({ type: 'change-number-of-rounds', payload: { numberOfRounds: numberOfRounds[action] } });
-      speechModel.stopListening();
+      if (speechModel.isListening())
+        speechModel.stopListening();
     }
-  }, [action])
+  }, [action, speechModel])
 
 
   return <CustomContext.Provider value={providerState} >
