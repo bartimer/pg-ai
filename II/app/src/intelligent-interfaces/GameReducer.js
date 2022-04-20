@@ -20,9 +20,11 @@ export const initialState = {
     numberOfRounds: 5,
     currentRound:null,
     gameState:GameState.idle(),
-    faceRecognitionInterval : 200,
+    faceRecognitionInterval : 500,
     handRecognitionInterval: null,
     faceDetected: null,
+    startedListeningForYesNo: false,
+    loading:false
 }
 const round= {
     playerMove:null,
@@ -61,6 +63,10 @@ function determineWinner(playerMove, computerMove){
 export function gameReducer(state, action){
 
     switch (action.type) {
+        case 'start-loading':
+            return {...state, loading:true}
+        case 'stop-loading':
+            return {...state, loading:false}
         case 'start':
             return {...state, 
                 numberOfRounds:5, 
@@ -73,6 +79,8 @@ export function gameReducer(state, action){
                 currentRound: {...round}
             };
         case 'change-detected-face':
+            if (state.gameState.isIdle() || state.gameState.isFinished())
+                return {...state, faceDetected:action.payload.face, startedListeningForYesNo: true}
             return {...state, faceDetected:action.payload.face}
         case 'change-number-of-rounds':
                 return {...state, numberOfRounds:action.payload.numberOfRounds,gameState:GameState.started()};
@@ -125,7 +133,8 @@ export function gameReducer(state, action){
                 playerWins:playerWins, 
                 gameState: finished ? GameState.finished() : state.gameState,
                 handRecognitionInterval: finished ? null : state.handRecognitionInterval, 
-                faceRecognitionInterval: finished ? 200 : null,
+                faceRecognitionInterval: finished ? 500 : null,
+                startedListeningForYesNo:!finished
             };
         
     }

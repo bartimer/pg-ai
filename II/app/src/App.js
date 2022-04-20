@@ -42,7 +42,7 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <Router>
           <ResponsiveAppBar></ResponsiveAppBar>
-          <Container minWidth="sm" maxWidth="lg">
+          <Container maxWidth="lg">
             <Routes>
               <Route path="branch" element={<Branch />}>
               </Route>
