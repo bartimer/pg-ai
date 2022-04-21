@@ -62,7 +62,7 @@ export function RockPaperScissor() {
   const model = handPoseDetection.SupportedModels.MediaPipeHands;
   const [state, dispatch] = useReducer(gameReducer, initialState);
   const theme = useTheme();
-  const small = useMediaQuery(theme.breakpoints.down('sm'));
+  const small = useMediaQuery(theme.breakpoints.down('md'));
   const [speechModel, setSpeechModel] = useState(null);
   const [action, setAction] = useState(null)
   const [labels, setLabels] = useState(null)
@@ -256,7 +256,6 @@ export function RockPaperScissor() {
 
   return <CustomContext.Provider value={providerState} >
     <Spinner></Spinner>
-    <Container>
       {
         ((state.gameState.isIdle() || state.gameState.isFinished()) && !state.faceDetected) && <>
           <Typography>Waiting for a playing buddy....</Typography>
@@ -275,7 +274,7 @@ export function RockPaperScissor() {
             ref={webcamRef}
             mirrored={true}
             audio={false}
-            videoConstraints={{ width: small ? 450 : 640, facingMode: 'user' }}
+            videoConstraints={{ width: small ? 350 : 640, facingMode: 'user' }}
             style={{
               position: "absolute",
               marginLeft: "auto",
@@ -284,7 +283,7 @@ export function RockPaperScissor() {
               right: 0,
               textAlign: "center",
               zIndex: 9,
-              width: small ? 450 : 640,
+              width: small ? 350 : 640,
 
             }}
           />
@@ -299,15 +298,12 @@ export function RockPaperScissor() {
               right: 0,
               textAlign: "center",
               zIndex: 9,
-              width: small ? 450 : 640,
+              width: small ? 350 : 640,
 
             }}
           />
         </div>
 
       </Stack>
-
-
-    </Container>
   </CustomContext.Provider>
 }
