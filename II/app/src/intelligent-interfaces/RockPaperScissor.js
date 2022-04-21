@@ -266,7 +266,7 @@ export function RockPaperScissor() {
 
         <Button onClick={() => dispatch({ type: 'start' })}>Hello {state.faceDetected === 'unknown' ? 'stranger' : state.faceDetected}, Want to play a game? [Say YES]</Button>
       </>}
-      {(state.gameState.isWantsToPlay()) && <Button onClick={() => dispatch({ type: 'change-number-of-rounds', payload: { numberOfRounds: 3 } })}>How many rounds to you want to play? [Number from 1 to 9]</Button>}
+      {(state.gameState.isWantsToPlay()) && <Button onClick={() => dispatch({ type: 'change-number-of-rounds', payload: { numberOfRounds: 3 } })}>How many rounds to you want to play? [Say a number from 1 to 9]</Button>}
       <Stack>
         <Box textAlign="center"><CountDown></CountDown></Box>
         <ScoreBoard></ScoreBoard>
