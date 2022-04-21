@@ -91,11 +91,11 @@ export function RockPaperScissor() {
   }
   const createFaceDescriptors = async () => {
     Promise.all([
-      faceapi.nets.tinyFaceDetector.loadFromUri(`${process.env.PUBLIC_URL}/models`),
+      //faceapi.nets.tinyFaceDetector.loadFromUri(`${process.env.PUBLIC_URL}/models`),
       faceapi.nets.faceLandmark68Net.loadFromUri(`${process.env.PUBLIC_URL}/models`),
       faceapi.nets.faceRecognitionNet.loadFromUri(`${process.env.PUBLIC_URL}/models`),
       faceapi.nets.ssdMobilenetv1.loadFromUri(`${process.env.PUBLIC_URL}/models`),
-      faceapi.nets.faceExpressionNet.loadFromUri(`${process.env.PUBLIC_URL}/models`)
+      //faceapi.nets.faceExpressionNet.loadFromUri(`${process.env.PUBLIC_URL}/models`)
     ]).then(async () => {
       console.log("Start creating Face Descriptors.")
       const s = await loadLabeledImages();
