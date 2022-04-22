@@ -1,3 +1,4 @@
+import { MarkovChain } from "./Mdp";
 
 
 export class GameState{
@@ -15,34 +16,7 @@ export class GameState{
     static finished() {return new GameState('finished')}
 }
 
-export const initialState = {
-    rounds : [],
-    numberOfRounds: 5,
-    currentRound:null,
-    gameState:GameState.idle(),
-    faceRecognitionInterval : 500,
-    handRecognitionInterval: null,
-    faceDetected: null,
-    startedListeningForYesNo: false,
-    loading:false
-}
-const round= {
-    playerMove:null,
-    computerMove:null,
-    winner:null,
-    captureAction: false,
-    captureFinished: false,
-    countDown:3,
-    timeBeforeNextRound:5,
-}
-
-const moves =['rock','paper','scissors']
-
-
-
-function makeMove(){
-    return moves[Math.floor(Math.random()*2.99999999999)]
-}
+export const moves =['rock','paper','scissors'];
 
 const gameResults = [
     {playerMove:'rock', computerMove:'rock', winner:'unknown'},
@@ -56,10 +30,47 @@ const gameResults = [
     {playerMove:'scissors', computerMove:'scissors', winner:'unknown'},
 ];
 
+export const initialState = {
+    rounds : [],
+    numberOfRounds: 5,
+    currentRound:null,
+    gameState:GameState.idle(),
+    faceRecognitionInterval : 500,
+    handRecognitionInterval: null,
+    faceDetected: null,
+    startedListeningForYesNo: false,
+    loading:false,
+    previousResult: createMdpResult()
+}
+const round= {
+    playerMove:null,
+    computerMove:null,
+    winner:null,
+    captureAction: false,
+    captureFinished: false,
+    countDown:3,
+    timeBeforeNextRound:5,
+}
+
+
+
+function createMdpResult(playerMove = makeMove(), computerMove = makeMove()){
+    const winner = determineWinner(playerMove, computerMove);
+    return `${playerMove}${computerMove}${winner === 'player' ? 'W':winner === 'computer' ? 'L': 'D'}`
+} 
+
+
+function makeMove(){
+    return moves[Math.floor(Math.random()*2.99999999999)]
+}
+
+
+
 function determineWinner(playerMove, computerMove){
     return gameResults.find(x => x.playerMove === playerMove && x.computerMove === computerMove).winner;
 }
 
+const mdp = new MarkovChain(1,0.9);
 export function gameReducer(state, action){
 
     switch (action.type) {
@@ -103,9 +114,12 @@ export function gameReducer(state, action){
             if (state.currentRound?.captureFinished || state.gameState.isFinished())
                 return state;
             
-            const computerMove = makeMove()
+            const computerMove = mdp.predict(state.previousResult); //makeMove()
+            mdp.updateState(state.previousResult, action.payload.move);
             console.log(computerMove);
             const winner =determineWinner(action.payload.move, computerMove)
+            const previousResult = createMdpResult(action.payload.move, computerMove);
+            
             const rounds = [...state.rounds];
             let computerWins = state.computerWins;
             let playerWins = state.playerWins;
@@ -134,7 +148,8 @@ export function gameReducer(state, action){
                 gameState: finished ? GameState.finished() : state.gameState,
                 handRecognitionInterval: finished ? null : state.handRecognitionInterval, 
                 faceRecognitionInterval: finished ? 500 : null,
-                startedListeningForYesNo:!finished
+                startedListeningForYesNo:!finished,
+                previousResult: previousResult
             };
         
     }

@@ -1,5 +1,6 @@
 # SPA for IOT assignment
 
+[Demo of intelligent interfaces assigment](https://bartimer.github.io/pg-ai/#/intelligent-interfaces) Rock paper scissors
 
 ## Available Scripts
 
