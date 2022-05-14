@@ -2,33 +2,14 @@ import { moves } from "./GameReducer";
 
 const combinations = [
     'paperrockW',
-    'paperpaperW',
-    'paperscissorsW',
-    'rockrockW',
-    'rockpaperW',
     'rockscissorsW',
-    'scissorsrockW',
     'scissorspaperW',
-    'scissorsscissorsW',
-    'paperrockL',
-    'paperpaperL',
     'paperscissorsL',
-    'rockrockL',
     'rockpaperL',
-    'rockscissorsL',
     'scissorsrockL',
-    'scissorspaperL',
-    'scissorsscissorsL',
-    'paperrockD',
     'paperpaperD',
-    'paperscissorsD',
     'rockrockD',
-    'rockpaperD',
-    'rockscissorsD',
-    'scissorsrockD',
-    'scissorspaperD',
     'scissorsscissorsD',
-    
 ]
 export class MarkovChain {
     order

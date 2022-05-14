@@ -2,9 +2,15 @@
 
 ## Demo
 
-[Demo of intelligent interfaces assigment](https://bartimer.github.io/pg-ai/#/intelligent-interfaces) Rock paper scissors
+[Demo of intelligent interfaces assigment](https://bartimer.github.io/pg-ai/#/intelligent-interfaces) Rock paper scissors.
 
-## Available Scripts
+## Details
+
+You can find more details on the project and implementation [here](./rock_paper_scisors.pdf).
+
+If you prefer a guided walktrough and demo, you can watch this [video](https://user-images.githubusercontent.com/120823/168426528-0c36e41a-4318-4eef-ae6c-e937ac2ff6f4.mp4).
+
+## Running it locally
 
 In the project directory, you can run:
 
@@ -27,23 +33,3 @@ It correctly bundles React in production mode and optimizes the build for the be
 
 The build is minified and the filenames include the hashes.\
 Your app is ready to be deployed!
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
