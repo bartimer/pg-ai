@@ -8,8 +8,15 @@ For the IOT & Big data module within the postgraduate on AI @ EHB I had to demon
 1. Visualize all this information in a UI
     * The web application can be found [here](./app/src)
 
-![Overview Sensors](./sensor-overview.jpg "Overview Sensors")
-![Sensor detail and prediction](./sensor-detail.jpg "Sensor Detail")
+<table>
+<td>
+
+<img src="./sensor-overview.jpg" width="400" title="Overview sensors"/>
+</td>
+<td>
+<img src="./sensor-detail.jpg" width="400" title="Sensor detail"/>
+</td>
+</table>
 
 ## Demo (recorded)
 The server side code is not hosted at a publicly available domain.
