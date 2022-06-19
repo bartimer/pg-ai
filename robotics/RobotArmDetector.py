@@ -91,10 +91,13 @@ class RobotArmDetector:
         
         return (None,None)
 
-    def put_info(self, distance, reward, step):
-        self.__show_image('spotted', cv2.putText(self.final_image, f'step: {step}, target: {self.__target_location[0]:3.2},{self.__target_location[1]:3.2}, arm: {self.position[0]:3.2},{self.position[1]:3.2}, distance:{distance:3.3}, reward: {float(reward):3.3}',
-            (10,30),cv2.FONT_HERSHEY_COMPLEX,0.5,(20,20,0)))
-        self.__show_image('spotted', self.final_image)
+    def put_info(self, distance, reward, step,actions):
+        text_image = cv2.putText(self.final_image, f'step: {step}, target: {self.__target_location[0]:3.2},{self.__target_location[1]:3.2}, arm: {self.position[0]:3.2},{self.position[1]:3.2}',
+            (10,30),cv2.FONT_HERSHEY_COMPLEX,0.45,(20,20,0))
+        text_image = cv2.putText(text_image, f'{self.position[1]:3.2}, dist:{distance:3.3}, rew: {float(reward):3.2}, servo:{float(actions[0]):3.2},{float(actions[1]):3.2}',
+            (10,50),cv2.FONT_HERSHEY_COMPLEX,0.45,(20,20,0))
+        cv2.imshow('spotted',text_image)
+        cv2.waitKey(10)
         cv2.setMouseCallback('spotted',self.update_target_location_from_mouse_click)
         
     def get_arm_end_coordinates(self,image):
@@ -127,12 +130,13 @@ class RobotArmDetector:
             cv2.imshow(label,image)
             cv2.waitKey(10)
 
-# You can set the debug flag to true to show images
-# detector = RobotArmDetector(True)
+if __name__ == "__main__":
+    # You can set the debug flag to true to show images
+    detector = RobotArmDetector(True)
 
-# Use show_video to position the robot arm
-# detector.show_video()
+    # Use show_video to position the robot arm
+    detector.show_video()
 
-# use the wait for key parameter to wait until a key is pressed
-# x,y = detector.get_current_arm_end_coordinates(True)
-# print(y)
+    # use the wait for key parameter to wait until a key is pressed
+    # x,y = detector.get_current_arm_end_coordinates(True)
+    # print(y)

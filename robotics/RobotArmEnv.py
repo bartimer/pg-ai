@@ -13,7 +13,7 @@ class RobotArmEnv(gym.Env):
         self.observation_space = gym.spaces.Box(low=0.0, high=1.0, shape=(6,), dtype=np.float32)
         self.action_space = gym.spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32) 
         self.controller = RobotArmController()
-        self.detector = RobotArmDetector(True)
+        self.detector = RobotArmDetector(False)
         self.visited_x = []
         self.visited_y = []
     
@@ -35,7 +35,7 @@ class RobotArmEnv(gym.Env):
         new_x, new_y = self.detector.get_current_arm_end_coordinates()
         target_x, target_y = self.detector.get_target_location()
         
-        any_movement = abs(new_x - self.state[2]) > 0.001 or abs(new_y - self.state[3]) > 0.001
+        any_movement = abs(new_servo_positions[0] - previous_servo_positions[0]) > 0.005 or abs(new_servo_positions[1] - previous_servo_positions[1]) > 0.005
         if any_movement:
             self.stand_still_count = 0  # np.max([0, self.stand_still_count - 5])
         else:
@@ -56,9 +56,9 @@ class RobotArmEnv(gym.Env):
             done = True
             print('Target reached!')
         elif any_movement:
-            reward = 2*(0.7 - (distance/distance_max)**0.35)
+            reward = 2*(0.9 - (distance/distance_max)**0.35)
         else:
-            reward = np.max([-5, -0.1*self.stand_still_count])
+            reward = -1 + np.max([-10, -0.2*self.stand_still_count])
         
         # elif distance > 0.2:
         #     reward = np.clip(distance * 10 ,1,5) * -1
@@ -72,23 +72,26 @@ class RobotArmEnv(gym.Env):
             done = True
             print('End of episode. Target not reached.')
         
-        self.detector.put_info(distance, reward, self.timestep)
+        self.detector.put_info(distance, reward, self.timestep, action)
         
         return self.state, reward, done, {}
 
-env = RobotArmEnv()
+if __name__ == "__main__":
+    env = RobotArmEnv()
 
-env = Monitor(env,'./logs/')
-eval_callback = EvalCallback(env, best_model_save_path='./logs/',
-                             log_path='./logs/', eval_freq=200,
-                             deterministic=True, render=False)
+    env = Monitor(env,'./logs/')
+    eval_callback = EvalCallback(env, best_model_save_path='./logs/',
+                                log_path='./logs/', eval_freq=200,
+                                deterministic=True, render=False)
 
-agent = sb3.SAC(
-    policy="MlpPolicy",
-    env=env,
-    verbose=1,
-    tensorboard_log="./logs/"
-)
+    agent = sb3.SAC(
+        policy="MlpPolicy",
+        env=env,
+        verbose=1,
+        tensorboard_log="./logs/"
+    )
+
+    agent.learn(total_timesteps = 5000,log_interval=2, callback=eval_callback)
 
 # class TensorboardCallback(BaseCallback):
 #     """
@@ -106,5 +109,5 @@ agent = sb3.SAC(
 #             self.logger.dump(self.num_timesteps)
 #         return True
 
-agent.learn(total_timesteps = 5000,log_interval=2, callback=eval_callback)
+
 
