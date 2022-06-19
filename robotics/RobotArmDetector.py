@@ -91,10 +91,10 @@ class RobotArmDetector:
         
         return (None,None)
 
-    def put_info(self, distance, reward, step,actions):
+    def put_info(self, distance, reward, step, actions, pos_servos):
         text_image = cv2.putText(self.final_image, f'step: {step}, target: {self.__target_location[0]:3.2},{self.__target_location[1]:3.2}, arm: {self.position[0]:3.2},{self.position[1]:3.2}',
             (10,30),cv2.FONT_HERSHEY_COMPLEX,0.45,(20,20,0))
-        text_image = cv2.putText(text_image, f'{self.position[1]:3.2}, dist:{distance:3.3}, rew: {float(reward):3.2}, servo:{float(actions[0]):3.2},{float(actions[1]):3.2}',
+        text_image = cv2.putText(text_image, f'dist:{distance:3.3}, rew: {float(reward):3.2}, actions:{float(actions[0]):3.2},{float(actions[1]):3.2}, servos:{int(pos_servos[0]*180)},{int(pos_servos[1]*180)}',
             (10,50),cv2.FONT_HERSHEY_COMPLEX,0.45,(20,20,0))
         cv2.imshow('spotted',text_image)
         cv2.waitKey(10)

@@ -51,7 +51,7 @@ class RobotArmController:
             time.sleep(0.2)
         
 
-    def __convert_direction_to_new_angle(self, previous_angle, direction):
+    def __convert_direction_to_new_angle_absolute(self, previous_angle, direction):
         direction = np.clip(direction, -1, 1)
         new_angle_absolute = 90 + 90 * direction
         if new_angle_absolute > previous_angle:
@@ -59,7 +59,17 @@ class RobotArmController:
         else:
             new_angle = previous_angle - int(np.min([10, (previous_angle - new_angle_absolute) /10]))
         return int(np.clip(new_angle, 0, 180))
-
+    
+    def __convert_direction_to_new_angle(self, previous_angle, direction):
+        direction = np.clip(direction, -1, 1)
+        new_angle = int(previous_angle + round(direction * 10))
+        # Move slightly in opposite direction when over the boundaries
+        if new_angle > 182:
+            new_angle = int(previous_angle + round(direction * -5))
+        if new_angle < -2:
+            new_angle = int(previous_angle + round(direction * -5))
+        return int(np.clip(new_angle, 0, 180))
+    
     def __send_command(self,command, arg0=0, arg1=0):
         data = json.dumps({"start": [command, arg0, arg1, 0, 0 ]}) + '\n'
         self.arm.write(bytes(data, 'utf8'))

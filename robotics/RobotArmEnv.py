@@ -16,6 +16,7 @@ class RobotArmEnv(gym.Env):
         self.detector = RobotArmDetector(False)
         self.visited_x = []
         self.visited_y = []
+        self.timsteps_max = 200
     
     def reset(self):
         self.timestep = 0
@@ -56,9 +57,9 @@ class RobotArmEnv(gym.Env):
             done = True
             print('Target reached!')
         elif any_movement:
-            reward = 2*(0.9 - (distance/distance_max)**0.35)
+            reward = (0.9 - (distance/distance_max)**0.35)
         else:
-            reward = -1 + np.max([-10, -0.2*self.stand_still_count])
+            reward = -1 + (-10) * self.stand_still_count/self.timsteps_max
         
         # elif distance > 0.2:
         #     reward = np.clip(distance * 10 ,1,5) * -1
@@ -67,12 +68,12 @@ class RobotArmEnv(gym.Env):
         # elif abs(previous_servo_positions[0] + new_servo_positions[0]) > 1.9 or abs(previous_servo_positions[1] + new_servo_positions[1]) > 1.9:
         #     reward = -1
         
-        if self.timestep == 200:
-            reward = -1
+        if self.timestep == self.timsteps_max:
+            reward = -10
             done = True
             print('End of episode. Target not reached.')
         
-        self.detector.put_info(distance, reward, self.timestep, action)
+        self.detector.put_info(distance, reward, self.timestep, action, new_servo_positions)
         
         return self.state, reward, done, {}
 
