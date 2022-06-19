@@ -13,7 +13,7 @@ class RobotArmDetector:
         super().__init__()
         self.debug = debug
         print('Before initializing camera')
-        self.video = cv2.VideoCapture(0,cv2.CAP_DSHOW)
+        self.video = cv2.VideoCapture(1,cv2.CAP_DSHOW)
         print('After initialition camera')
         self.__target_location = (0.7,0.7)
     

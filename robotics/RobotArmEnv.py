@@ -6,6 +6,7 @@ from stable_baselines3.common.callbacks import EvalCallback
 from stable_baselines3.common.monitor import Monitor
 from RobotArmController import RobotArmController
 from RobotArmDetector import RobotArmDetector
+import collections
 
 class RobotArmEnv(gym.Env):
     def __init__(self):
@@ -17,10 +18,15 @@ class RobotArmEnv(gym.Env):
         self.visited_x = []
         self.visited_y = []
         self.timsteps_max = 200
+        
     
     def reset(self):
         self.timestep = 0
-        self.controller.initialize()
+        positions = self.controller.initialize()
+        a = np.zeros((10,2), dtype=float)
+        a[:,0].fill(positions[0])
+        a[:,1].fill(positions[1])
+        self.previous_servo_positions = collections.deque(a, 10)
         x,y = self.detector.get_current_arm_end_coordinates()
         target_x, target_y = self.detector.get_target_location()
         self.state = (target_x, target_y, x, y, 0.5,0.5)
@@ -29,14 +35,15 @@ class RobotArmEnv(gym.Env):
         return self.state
     
     def step(self, action):
+        
         previous_distance  = sqrt((self.state[0] - self.state[2]) ** 2 + (self.state[1] - self.state[3]) ** 2)
         previous_servo_positions = (self.state[4],self.state[5])
         new_servo_positions = self.controller.move_servos(action[0], action[1])
-        
+        self.previous_servo_positions.append(new_servo_positions)
         new_x, new_y = self.detector.get_current_arm_end_coordinates()
         target_x, target_y = self.detector.get_target_location()
-        
-        any_movement = abs(new_servo_positions[0] - previous_servo_positions[0]) > 0.005 or abs(new_servo_positions[1] - previous_servo_positions[1]) > 0.005
+        mean_previous_servo_pos = np.mean(self.previous_servo_positions,axis=0)
+        any_movement = abs(new_servo_positions[0] - mean_previous_servo_pos[0]) > 0.01 or abs(new_servo_positions[1] - mean_previous_servo_pos[1]) > 0.01
         if any_movement:
             self.stand_still_count = 0  # np.max([0, self.stand_still_count - 5])
         else:
@@ -57,9 +64,9 @@ class RobotArmEnv(gym.Env):
             done = True
             print('Target reached!')
         elif any_movement:
-            reward = (0.9 - (distance/distance_max)**0.35)
+            reward = 2*(0.8 - (distance/distance_max)**0.35)
         else:
-            reward = -1 + (-10) * self.stand_still_count/self.timsteps_max
+            reward = -1 + (-10) * float(np.max([0.2,distance])) * self.stand_still_count/self.timsteps_max
         
         # elif distance > 0.2:
         #     reward = np.clip(distance * 10 ,1,5) * -1
@@ -92,7 +99,7 @@ if __name__ == "__main__":
         tensorboard_log="./logs/"
     )
 
-    agent.learn(total_timesteps = 5000,log_interval=2, callback=eval_callback)
+    agent.learn(total_timesteps = 10000,log_interval=2, callback=eval_callback)
 
 # class TensorboardCallback(BaseCallback):
 #     """

@@ -17,14 +17,15 @@ class RobotArmController:
 
     def initialize(self):
         if not self.initialized:
-            self.arm = serial.Serial(port='COM5',baudrate=115200)
+            self.arm = serial.Serial(port='COM6',baudrate=115200)
             self.__set_pinmodes_and_attach_servos()
         self.move_to(1,89)
         time.sleep(0.03)  
         self.move_to(2,90)
         time.sleep(0.02)  
         self.move_to(3,0)
-        self.initialized  =True
+        self.initialized = True
+        return self.__get_position_servos()
     
     def move_servos(self, direction_servo1, direction_servo2):
         
@@ -32,7 +33,7 @@ class RobotArmController:
         time.sleep(0.01)   
         self.move_to(2, self.__convert_direction_to_new_angle(self.servo_angles[2], direction_servo2))
         time.sleep(0.01)   
-        return (self.servo_angles[1]/180, self.servo_angles[2]/180)
+        return self.__get_position_servos()
 
     def move_to(self, servoNumber, angle):
         self.__send_command("servo_write", servoNumber, angle)
@@ -50,6 +51,8 @@ class RobotArmController:
             self.__send_command('servo_attach', i, pin)
             time.sleep(0.2)
         
+    def __get_position_servos(self):
+        return (self.servo_angles[1]/180, self.servo_angles[2]/180)
 
     def __convert_direction_to_new_angle_absolute(self, previous_angle, direction):
         direction = np.clip(direction, -1, 1)
