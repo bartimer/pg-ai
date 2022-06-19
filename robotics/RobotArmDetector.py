@@ -1,15 +1,20 @@
 # import the opencv library
 import cv2
+import os
 from cv2 import MORPH_ELLIPSE
 from cv2 import MORPH_OPEN
 import numpy as np
 
 cameraOnly = False
+arm_mask_min, arm_mask_max = np.array([0,38,0]),np.array([179,255,155])
+sticker_mask_min, sticker_mask_max = np.array([0,209,107]),np.array([20,255,255])
 class RobotArmDetector:
     def __init__(self, debug= False):
         super().__init__()
         self.debug = debug
-        self.video = cv2.VideoCapture(0)
+        print('Before initializing camera')
+        self.video = cv2.VideoCapture(0,cv2.CAP_DSHOW)
+        print('After initialition camera')
         self.__target_location = (0.7,0.7)
     
     def show_video(self):
@@ -51,7 +56,7 @@ class RobotArmDetector:
         return np.argmax(list(map(lambda x: cv2.contourArea(x),contours)))
 
     def __create_arm_mask(self, image_hsv, show_bounding_box = False):
-        image_onlyblack =cv2.inRange(image_hsv, np.array([0,0,0]),np.array([179,255,40]))
+        image_onlyblack =cv2.inRange(image_hsv, arm_mask_min, arm_mask_max)
         self.__show_image('hsv-onlyblack', image_onlyblack)
         
         element = cv2.getStructuringElement(MORPH_ELLIPSE,(5,5))
@@ -70,7 +75,7 @@ class RobotArmDetector:
         return result
 
     def __get_sticker_coordinates(self,image_robotarm):
-        image_sticker = cv2.inRange(image_robotarm, np.array([155,100,90]),np.array([179,255,255]))
+        image_sticker = cv2.inRange(image_robotarm, sticker_mask_min, sticker_mask_max)
         self.__show_image('sticker', image_sticker)
         element = cv2.getStructuringElement(MORPH_ELLIPSE,(3,3))
         image_sticker = cv2.morphologyEx(image_sticker,MORPH_OPEN, element)
@@ -86,22 +91,23 @@ class RobotArmDetector:
         
         return (None,None)
 
-    def put_info(self, distance, reward):
-        self.__show_image('spotted', cv2.putText(self.final_image, f'target: {self.__target_location[0]:3.2},{self.__target_location[1]:3.2}, arm: {self.position[0]:3.2},{self.position[1]:3.2}, distance:{distance:3.3}, reward: {reward}',
-            (10,30),cv2.FONT_HERSHEY_COMPLEX,0.5,(255,255,0)))
+    def put_info(self, distance, reward, step):
+        self.__show_image('spotted', cv2.putText(self.final_image, f'step: {step}, target: {self.__target_location[0]:3.2},{self.__target_location[1]:3.2}, arm: {self.position[0]:3.2},{self.position[1]:3.2}, distance:{distance:3.3}, reward: {float(reward):3.3}',
+            (10,30),cv2.FONT_HERSHEY_COMPLEX,0.5,(20,20,0)))
         self.__show_image('spotted', self.final_image)
         cv2.setMouseCallback('spotted',self.update_target_location_from_mouse_click)
         
     def get_arm_end_coordinates(self,image):
         image_hsv = cv2.cvtColor(image,cv2.COLOR_BGR2HSV)
+        self.__save_sample(image_hsv)
         mask = self.__create_arm_mask(image_hsv, False)
         self.height = image_hsv.shape[0]
         self.width = image_hsv.shape[1]
         image_robotarm = cv2.bitwise_and(image_hsv,mask)
-        self.__save_sample(image_robotarm)
+        self.__save_sample(image_robotarm, 'arm_sample.png')
         self.__show_image('robot-arm', image_robotarm)
         
-        cX, cY = self.__get_sticker_coordinates(image_hsv)
+        cX, cY = self.__get_sticker_coordinates(image_robotarm)
         if (cX == None or cY == None):
             print('Could not find arm end coordinates, returning defaults...')
             cX = self.width // 2
@@ -114,7 +120,7 @@ class RobotArmDetector:
     
     def __save_sample(self, image, filename='sample.png'):
         if (self.debug):
-            cv2.imwrite(filename,cv2.cvtColor(image,cv2.COLOR_HSV2BGR))
+            cv2.imwrite(os.path.join('images',filename),cv2.cvtColor(image,cv2.COLOR_HSV2BGR))
 
     def __show_image(self,label,image):
         if (self.debug):
@@ -122,7 +128,7 @@ class RobotArmDetector:
             cv2.waitKey(10)
 
 # You can set the debug flag to true to show images
-# detector = RobotArmDetector()
+# detector = RobotArmDetector(True)
 
 # Use show_video to position the robot arm
 # detector.show_video()

@@ -1,5 +1,6 @@
 import cv2
 import sys
+import os
 import numpy as np
 
 def nothing(x):
@@ -24,8 +25,8 @@ cv2.setTrackbarPos('VMax', 'determine-threshold', 255)
 # Initialize to check if HSV min/max value changes
 hMin = sMin = vMin = hMax = sMax = vMax = 0
 phMin = psMin = pvMin = phMax = psMax = pvMax = 0
-
-img = cv2.imread('sample.png')
+print(os.getcwd())
+img = cv2.imread(os.path.join('images', 'sample.png'))
 output = img
 waitTime = 33
 
@@ -50,7 +51,8 @@ while(1):
 
     # Print if there is a change in HSV value
     if( (phMin != hMin) | (psMin != sMin) | (pvMin != vMin) | (phMax != hMax) | (psMax != sMax) | (pvMax != vMax) ):
-        print("(hMin = %d , sMin = %d, vMin = %d), (hMax = %d , sMax = %d, vMax = %d)" % (hMin , sMin , vMin, hMax, sMax , vMax))
+        # print("(hMin = %d , sMin = %d, vMin = %d), (hMax = %d , sMax = %d, vMax = %d)" % (hMin , sMin , vMin, hMax, sMax , vMax))
+        print(f"np.array([{hMin},{sMin},{vMin}]),np.array([{hMax},{sMax},{vMax}])"); 
         phMin = hMin
         psMin = sMin
         pvMin = vMin

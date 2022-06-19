@@ -8,3 +8,5 @@ IOT/.ipynb_checkpoints/
 IOT/model_sensor.sav
 IOT/flaskr/config.py
 robotics/logs/
+**/__pycache__/
+*.xcf

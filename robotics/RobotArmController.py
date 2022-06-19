@@ -14,29 +14,34 @@ class RobotArmController:
         self.servopins = [9,6,5,3,11];    # Define servo interface digital interface 9 for servo 0, etc
         self.servo_angles = [90,90,90,90,90]
         self.initialized= False
+
     def initialize(self):
         if not self.initialized:
             self.arm = serial.Serial(port='COM5',baudrate=115200)
             self.__set_pinmodes_and_attach_servos()
         self.move_to(1,89)
+        time.sleep(0.01)  
         self.move_to(2,90)
+        time.sleep(0.01)  
         self.move_to(3,0)
         self.initialized  =True
     
-    def move_to(self, servoNumber, angle):
-        self.__send_command("servo_write", servoNumber, angle)
-        self.servo_angles[servoNumber] = angle
-        time.sleep(0.1)   
-    
-    
-
     def move_servos(self, direction_servo1, direction_servo2):
         
         self.move_to(1, self.__convert_direction_to_new_angle(self.servo_angles[1], direction_servo1))
-        time.sleep(0.05)   
+        time.sleep(0.01)   
         self.move_to(2, self.__convert_direction_to_new_angle(self.servo_angles[2], direction_servo2))
-        time.sleep(0.05)   
+        time.sleep(0.01)   
         return (self.servo_angles[1]/180, self.servo_angles[2]/180)
+
+    def move_to(self, servoNumber, angle):
+        self.__send_command("servo_write", servoNumber, angle)
+        self.servo_angles[servoNumber] = angle
+        time.sleep(0.02)   
+    
+    def dispose(self):
+        self.initialized = False
+        self.arm.close() 
     
     def __set_pinmodes_and_attach_servos(self):
         for i,pin in enumerate(self.servopins):
@@ -48,12 +53,20 @@ class RobotArmController:
 
     def __convert_direction_to_new_angle(self, previous_angle, direction):
         direction = np.clip(direction, -1, 1)
-        return int(np.clip(previous_angle + round(direction * 10), 0, 180))
+        new_angle = int(previous_angle + round(direction * 10))
+        # Move in opposite direction when over the boundaries
+        if new_angle > 182:
+            new_angle = int(previous_angle + round(direction * -10))
+        if new_angle < -2:
+            new_angle = int(previous_angle + round(direction * -10))
+        return int(np.clip(new_angle, 0, 180))
 
     def __send_command(self,command, arg0=0, arg1=0):
         data = json.dumps({"start": [command, arg0, arg1, 0, 0 ]}) + '\n'
         self.arm.write(bytes(data, 'utf8'))
-        self.arm.flush()    
+        self.arm.flush()   
+
+    
 
 
 # arm = RobotArmController()
