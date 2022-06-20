@@ -17,7 +17,7 @@ class RobotArmController:
 
     def initialize(self):
         if not self.initialized:
-            self.arm = serial.Serial(port='COM6',baudrate=115200)
+            self.arm = serial.Serial(port='COM5',baudrate=115200)
             self.__set_pinmodes_and_attach_servos()
         self.move_to(1,89)
         time.sleep(0.03)  
