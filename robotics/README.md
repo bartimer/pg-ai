@@ -124,5 +124,8 @@ The target location is part of the observation space. After a few experiments wi
 
 Therefore we experimented a bit with changing the target location after x successfull episodes or y unsuccessfull episodes, starting with easier to reach targets to try to speed up the learning process. This did not yet result in a good learning curve but might need more timesteps (only tested with 10 000).
 
+It does show however some learning when we click in certain areas the agent is able to move the arm in the correct direction as demonstrated in the video below
+[https://user-images.githubusercontent.com/120823/174902468-7e34faa9-2650-40f9-90ee-651ae2154d36.mp4](https://user-images.githubusercontent.com/120823/174902468-7e34faa9-2650-40f9-90ee-651ae2154d36.mp4)
+
 
 
