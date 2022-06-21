@@ -34,7 +34,7 @@ Off course you can [play rock, paper, scissors](https://bartimer.github.io/pg-ai
 
 ### Robotics
 
-This module combines robotics and AI with a focus on computer vision and reinforcement learning. For the assignment, we need to learn a robot arm to navigate to a point we click on image taken by the camera. 
+This module combines robotics and AI with a focus on computer vision and reinforcement learning. For the assignment, we need to learn a robot arm to navigate to a location, pointed out by clicking on a live camera view of the robot arm. 
 
-The implementation is currently in progress ...
+You can find the implementation [here](./robotics)
 

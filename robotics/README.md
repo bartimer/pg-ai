@@ -1,5 +1,5 @@
 # Assigment: Use reinforcement learning to move a robot arm to a wanted position
-The goal of the assigment in to move a robot arm to a certain position in a safe way learned through RL. 
+The goal of the assigment is to move a robot arm to a certain position in a safe way learned through RL. 
 
 We use an [Adeept robot arm](http://www.adeept.com/robotic-arm-uno_p0118.html).
 
