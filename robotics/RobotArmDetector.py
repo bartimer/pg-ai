@@ -1,4 +1,5 @@
 # import the opencv library
+import random
 import cv2
 import os
 from cv2 import MORPH_ELLIPSE
@@ -6,8 +7,22 @@ from cv2 import MORPH_OPEN
 import numpy as np
 
 cameraOnly = False
-arm_mask_min, arm_mask_max = np.array([0,38,0]),np.array([179,255,155])
-sticker_mask_min, sticker_mask_max = np.array([0,209,107]),np.array([20,255,255])
+arm_mask_min, arm_mask_max = np.array([0,14,1]),np.array([150,253,127])
+sticker_mask_min, sticker_mask_max = np.array([0,82,29]),np.array([13,255,191])
+
+default_target_locations = [(0.6,0.3),
+(0.41,0.29),
+(0.52,0.34),
+(0.66,0.39),
+(0.23,0.53),
+(0.65,0.35),
+(0.34,0.33),
+(0.71,0.56),
+(0.24,0.6),
+(0.22,0.68),
+(0.7,0.7),
+(0.2,0.54)]
+
 class RobotArmDetector:
     def __init__(self, debug= False):
         super().__init__()
@@ -15,7 +30,8 @@ class RobotArmDetector:
         print('Before initializing camera')
         self.video = cv2.VideoCapture(0,cv2.CAP_DSHOW)
         print('After initialition camera')
-        self.__target_location = (0.7,0.7)
+        self.__target_location = default_target_locations[0]
+        self.target_locations = default_target_locations
     
     def show_video(self):
         while(True):
@@ -29,6 +45,11 @@ class RobotArmDetector:
 
 
     def get_target_location(self):
+        return self.__target_location
+    
+    def set_random_target_location(self,index):
+        current = self.get_current_arm_end_coordinates()
+        self.__target_location = self.target_locations[int(np.clip(index, 0, len(self.target_locations)-1))]
         return self.__target_location
     
     def get_current_arm_end_coordinates(self,waitForKey=False):

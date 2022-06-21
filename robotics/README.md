@@ -5,6 +5,16 @@ We use an [Adeept robot arm](http://www.adeept.com/robotic-arm-uno_p0118.html).
 
 ![Adeept robot arm](./images/adeept-robotarm.jpg)
 
+## Brief summary of the files and how to start
+[RobotArmEnv.py](RobotArmEnv.py) contains the environment and a `__main__` to start a learning agent.
+
+Other files are
+ * [RobotArmDetector.py](RobotArmDetector.py) contains the object detection and when started as  `__main__` it can be used to set the scene and make sure the robot arm fits well in the camera shot
+ * [RobotArmController.py](RobotArmController.py) controls the (serial) communication with the robot arm
+ 
+
+In the tools folder you can find a [thresholdtool.py](./tools/thresholdtool.py) to create the masks for the robot arm and the sticker.
+
 ## Object detection ([RobotArmDetector.py](RobotArmDetector.py))
 The positon of robot arm is determined through object detection of a camera image. The openCV library is used for this.
 We will determine the object by filtering colors based on their HSV values. 
@@ -58,7 +68,7 @@ and the action space has
  * servo 2 movement
 
 ### Shaping the reward function  
-We started of as simple as possible with just a reward when reaching the target and a constant low negative reward when the target was not reached: As expected difficult to learn anything.
+We started of as simple as possible with a fixed target location and just a reward when reaching the target and a constant low negative reward when the target was not reached: As expected difficult to learn anything.
 
 Next step was to bring (Euclidian) distance (between current and target location) and previous distance into the picture: Add a constant negative reward when moving further away then the previous step, this resulted in a bit of a learning but the agent stopped doing anything to avoid negative rewards.
 
@@ -110,7 +120,9 @@ We are showing the episode length and mean reward for 3 different reward functio
 
 ## Changing the target location
 
-The target location is part of the observation space. After a few experiments with changing the target location, we noticed that the further we are in the learning, the rather it is to change the target. Targets in the neighbourhood of the old target could be reached easier then new targets that are far away. 
+The target location is part of the observation space. After a few experiments with changing the target location, we noticed that the further we are in the learning, the harder it is to change the target. Targets in the neighbourhood of the old target could be reached easier then new targets that are far away. 
+
+Therefore we experimented a bit with changing the target location after x successfull episodes or y unsuccessfull episodes, starting with easier to reach targets to try to speed up the learning process. This did not yet result in a good learning curve but might need more timesteps (only tested with 10 000).
 
 
 

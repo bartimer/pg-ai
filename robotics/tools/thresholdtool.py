@@ -3,6 +3,9 @@ import sys
 import os
 import numpy as np
 
+image_name = 'sample.png'
+image_name = 'arm_sample.png'
+
 def nothing(x):
     pass
 
@@ -26,7 +29,7 @@ cv2.setTrackbarPos('VMax', 'determine-threshold', 255)
 hMin = sMin = vMin = hMax = sMax = vMax = 0
 phMin = psMin = pvMin = phMax = psMax = pvMax = 0
 print(os.getcwd())
-img = cv2.imread(os.path.join('images', 'sample.png'))
+img = cv2.imread(os.path.join('images', image_name))
 output = img
 waitTime = 33
 

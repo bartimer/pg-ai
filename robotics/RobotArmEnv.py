@@ -12,15 +12,17 @@ import collections
 class RobotArmEnv(gym.Env):
     def __init__(self):
         super().__init__()
-        self.observation_space = gym.spaces.Box(
-            low=0.0, high=1.0, shape=(6,), dtype=np.float32)
-        self.action_space = gym.spaces.Box(
-            low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
+        self.observation_space = gym.spaces.Box(low=0.0, high=1.0, shape=(6,), dtype=np.float32)
+        self.action_space = gym.spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
         self.controller = RobotArmController()
         self.detector = RobotArmDetector(False)
         self.visited_x = []
         self.visited_y = []
         self.timsteps_max = 200
+        self.episodes_without_success = 0
+        self.episodes_with_success = 0
+        self.episodes = 0
+        self.target_index = 1
 
     def reset(self):
         self.timestep = 0
@@ -30,7 +32,15 @@ class RobotArmEnv(gym.Env):
         a[:, 1].fill(positions[1])
         self.previous_servo_positions = collections.deque(a, 10)
         x, y = self.detector.get_current_arm_end_coordinates()
-        target_x, target_y = self.detector.get_target_location()
+
+        if self.episodes_without_success == 12 or self.episodes_with_success == 10:
+            target_x, target_y = self.detector.set_random_target_location(self.target_index)
+            self.target_index += 1
+            self.episodes_without_success = 0
+            self.episodes_with_success = 0
+            if self.target_index == 10: self.target_index = 1
+        else:
+            target_x, target_y = self.detector.get_target_location()
         self.state = (target_x, target_y, x, y, 0.5, 0.5)
         self.timestep = 0
         self.stand_still_count = 0
@@ -55,7 +65,7 @@ class RobotArmEnv(gym.Env):
 
         self.state = (target_x, target_y, new_x, new_y, new_servo_positions[0], new_servo_positions[1])
         self.timestep += 1
-
+        
         self.visited_x.append(self.state[2])
         self.visited_y.append(self.state[3])
 
@@ -64,22 +74,26 @@ class RobotArmEnv(gym.Env):
         distance = sqrt((target_x - new_x) ** 2 + (target_y - new_y) ** 2)
 
         if distance < 0.04:
-            reward = 100
+            reward = 50
             done = True
+            self.episodes_with_success +=1
             print('Target reached!')
         elif any_movement:
-            reward = 2*(0.8 - (distance/distance_max)**0.35)
+            reward = (1 - (distance/distance_max)**0.4)
         else:
-            reward = -1 + (-10) * float(np.max([0.2, distance])) * self.stand_still_count/self.timsteps_max
+            reward = -0.1 + (-1) * float(np.max([0.2, distance])) * self.stand_still_count/self.timsteps_max
 
         if self.timestep == self.timsteps_max:
-            reward = -10
+            reward = -1
             done = True
+            self.episodes_without_success += 1
             print('End of episode. Target not reached.')
 
         self.detector.put_info(
             distance, reward, self.timestep, action, new_servo_positions)
 
+        if done:
+            self.episodes += 1
         return self.state, reward, done, {}
 
 
@@ -95,6 +109,7 @@ if __name__ == "__main__":
         policy="MlpPolicy",
         env=env,
         verbose=1,
+        learning_starts=800,
         tensorboard_log="./logs/"
     )
 

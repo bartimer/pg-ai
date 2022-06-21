@@ -12,27 +12,27 @@ class RobotArmController:
         for port in ports: print(port)
         
         self.servopins = [9,6,5,3,11];    # Define servo interface digital interface 9 for servo 0, etc
-        self.servo_angles = [90,89,90,90,90]
+        self.servo_angles = [90,93,90,90,90]
         self.initialized= False
 
     def initialize(self):
         if not self.initialized:
             self.arm = serial.Serial(port='COM5',baudrate=115200)
             self.__set_pinmodes_and_attach_servos()
-        self.move_to(1,89)
+        self.move_to(1,93)
         time.sleep(0.03)  
         self.move_to(2,90)
-        time.sleep(0.02)  
-        self.move_to(3,0)
+        time.sleep(0.03)  
+        # self.move_to(3,0)
         self.initialized = True
         return self.__get_position_servos()
     
     def move_servos(self, direction_servo1, direction_servo2):
         
         self.move_to(1, self.__convert_direction_to_new_angle(self.servo_angles[1], direction_servo1))
-        time.sleep(0.01)   
+        time.sleep(0.02)   
         self.move_to(2, self.__convert_direction_to_new_angle(self.servo_angles[2], direction_servo2))
-        time.sleep(0.01)   
+        time.sleep(0.02)   
         return self.__get_position_servos()
 
     def move_to(self, servoNumber, angle):
@@ -65,12 +65,14 @@ class RobotArmController:
     
     def __convert_direction_to_new_angle(self, previous_angle, direction):
         direction = np.clip(direction, -1, 1)
-        new_angle = int(previous_angle + round(direction * 10))
+        delta = direction * 10
+        delta = np.max([delta,1]) if delta > 0 else np.min([delta,-1])
+        new_angle = int(previous_angle + round(delta))
         # Move slightly in opposite direction when over the boundaries
-        if new_angle > 182:
-            new_angle = int(previous_angle + round(direction * -5))
-        if new_angle < -2:
-            new_angle = int(previous_angle + round(direction * -5))
+        if new_angle > 180:
+            new_angle = 179
+        if new_angle < 0:
+            new_angle = 1
         return int(np.clip(new_angle, 0, 180))
     
     def __send_command(self,command, arg0=0, arg1=0):
