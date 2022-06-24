@@ -4,6 +4,24 @@ import json
 import time
 import numpy as np
 
+movememts =[
+    [1,1],
+    [1,-1],
+    [1,8],
+    [1,-8],
+    [8,1],
+    [8,-1],
+    [8,8],
+    [8,-8],
+    [-1,1],
+    [-1,-1],
+    [-1,8],
+    [-1,-8],
+    [-8,1],
+    [-8,-1],
+    [-8,8],
+    [-8,-8],
+    ]
 PIN_OUTPUT = 1
 class RobotArmController:
     def __init__(self):
@@ -27,6 +45,9 @@ class RobotArmController:
         self.initialized = True
         return self.__get_position_servos()
     
+    def move_servos_discrete(self, index):
+        return self.move_servos(movememts[index][0]*0.1,movememts[index][1]*0.2)
+
     def move_servos(self, direction_servo1, direction_servo2):
         
         self.move_to(1, self.__convert_direction_to_new_angle(self.servo_angles[1], direction_servo1))

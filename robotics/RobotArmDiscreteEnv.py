@@ -9,11 +9,11 @@ from RobotArmDetector import RobotArmDetector
 import collections
 
 
-class RobotArmEnv(gym.Env):
+class DiscreteRobotArmEnv(gym.Env):
     def __init__(self):
         super().__init__()
         self.observation_space = gym.spaces.Box(low=0.0, high=1.0, shape=(8,), dtype=np.float32)
-        self.action_space = gym.spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
+        self.action_space = gym.spaces.Discrete(16)
         self.controller = RobotArmController()
         self.detector = RobotArmDetector(False)
         self.visited_x = []
@@ -48,8 +48,7 @@ class RobotArmEnv(gym.Env):
         return self.state
 
     def step(self, action):
-
-        new_servo_positions = self.controller.move_servos(action[0], action[1])
+        new_servo_positions = self.controller.move_servos_discrete(action)
         self.previous_servo_positions.append(new_servo_positions)
         
         p = self.detector.get_current_arm_end_coordinates()
@@ -66,16 +65,17 @@ class RobotArmEnv(gym.Env):
         else:
             self.stand_still_count += 1
 
-        self.state = (target_x, target_y, new_x, new_y, new_servo_positions[0], new_servo_positions[1],green_x, green_y)
+        
         self.timestep += 1
         
-        self.visited_x.append(self.state[2])
-        self.visited_y.append(self.state[3])
-
         done = False
+        
         distance_max = sqrt((np.max([target_x, 1-target_x])) ** 2 + ((np.max([target_y, 1-target_y])) ** 2))
+        previous_distance = sqrt((target_x - self.state[2]) ** 2 + (target_y - self.state[3]) ** 2)
         distance = sqrt((target_x - new_x) ** 2 + (target_y - new_y) ** 2)
-
+        
+        self.state = (target_x, target_y, new_x, new_y, new_servo_positions[0], new_servo_positions[1],green_x, green_y)
+        
         if distance < 0.04:
             reward = 50
             done = True
@@ -86,8 +86,8 @@ class RobotArmEnv(gym.Env):
         else:
             reward = -0.1 + (-1) * float(np.max([0.2, distance])) * self.stand_still_count/self.timsteps_max
 
+
         if self.timestep == self.timsteps_max:
-            reward = -1
             done = True
             self.episodes_without_success += 1
             print('End of episode. Target not reached.')
@@ -101,22 +101,21 @@ class RobotArmEnv(gym.Env):
 
 
 if __name__ == "__main__":
-    env = RobotArmEnv()
+    env = DiscreteRobotArmEnv()
 
     env = Monitor(env, './logs/')
     eval_callback = EvalCallback(env, best_model_save_path='./logs/',
                                  log_path='./logs/', eval_freq=200,
                                  deterministic=True, render=False)
 
-    agent = sb3.SAC(
+    agent = sb3.PPO(
         policy="MlpPolicy",
         env=env,
         verbose=1,
-        learning_starts=800,
         tensorboard_log="./logs/"
     )
 
-    agent.learn(total_timesteps=20000, log_interval=2, callback=eval_callback)
+    agent.learn(total_timesteps=10000, log_interval=2, callback=eval_callback)
 
 # class TensorboardCallback(BaseCallback):
 #     """

@@ -1,4 +1,5 @@
 # import the opencv library
+import collections
 import random
 import cv2
 import os
@@ -7,8 +8,9 @@ from cv2 import MORPH_OPEN
 import numpy as np
 
 cameraOnly = False
-arm_mask_min, arm_mask_max = np.array([0,14,1]),np.array([150,253,127])
-sticker_mask_min, sticker_mask_max = np.array([0,82,29]),np.array([13,255,191])
+arm_mask_min, arm_mask_max = np.array([0,36,0]),np.array([59,215,184])
+sticker_mask_min, sticker_mask_max = np.array([0,96,83]),np.array([7,255,214])
+green_sticker_min, green_sticker_max = np.array([22,21,60]),np.array([69,146,214])
 
 default_target_locations = [(0.6,0.3),
 (0.41,0.29),
@@ -95,8 +97,8 @@ class RobotArmDetector:
         self.__show_image('arm-mask', result)
         return result
 
-    def __get_sticker_coordinates(self,image_robotarm):
-        image_sticker = cv2.inRange(image_robotarm, sticker_mask_min, sticker_mask_max)
+    def __get_sticker_coordinates(self,image_robotarm, mask_min, mask_max):
+        image_sticker = cv2.inRange(image_robotarm, mask_min, mask_max)
         self.__show_image('sticker', image_sticker)
         element = cv2.getStructuringElement(MORPH_ELLIPSE,(3,3))
         image_sticker = cv2.morphologyEx(image_sticker,MORPH_OPEN, element)
@@ -111,11 +113,15 @@ class RobotArmDetector:
             return (cX,cY)
         
         return (None,None)
-
+    
     def put_info(self, distance, reward, step, actions, pos_servos):
         text_image = cv2.putText(self.final_image, f'step: {step}, target: {self.__target_location[0]:3.2},{self.__target_location[1]:3.2}, arm: {self.position[0]:3.2},{self.position[1]:3.2}',
             (10,30),cv2.FONT_HERSHEY_COMPLEX,0.45,(20,20,0))
-        text_image = cv2.putText(text_image, f'dist:{distance:3.3}, rew: {float(reward):3.2}, actions:{float(actions[0]):3.2},{float(actions[1]):3.2}, servos:{int(pos_servos[0]*180)},{int(pos_servos[1]*180)}',
+        if isinstance(actions,collections.Sequence):
+            text_image = cv2.putText(text_image, f'dist:{distance:3.3}, rew: {float(reward):3.2}, actions:{float(actions[0]):3.2},{float(actions[1]):3.2}, servos:{int(pos_servos[0]*180)},{int(pos_servos[1]*180)}',
+            (10,50),cv2.FONT_HERSHEY_COMPLEX,0.45,(20,20,0))
+        else:
+            text_image = cv2.putText(text_image, f'dist:{distance:3.3}, rew: {float(reward):3.2}, action:{actions}, servos:{int(pos_servos[0]*180)},{int(pos_servos[1]*180)}',
             (10,50),cv2.FONT_HERSHEY_COMPLEX,0.45,(20,20,0))
         cv2.imshow('spotted',text_image)
         cv2.waitKey(10)
@@ -131,16 +137,24 @@ class RobotArmDetector:
         self.__save_sample(image_robotarm, 'arm_sample.png')
         self.__show_image('robot-arm', image_robotarm)
         
-        cX, cY = self.__get_sticker_coordinates(image_robotarm)
+        cX, cY = self.__get_sticker_coordinates(image_robotarm, sticker_mask_min, sticker_mask_max)
         if (cX == None or cY == None):
             print('Could not find arm end coordinates, returning defaults...')
             cX = self.width // 2
             cY = self.height // 2
         final = cv2.circle(image, (cX, cY), 5, (0, 255, 255), -1)
         target = self.get_target_location()
-        self.final_image = cv2.circle(image, (int(target[0] * self.width), int(target[1] * self.height)), 5, (0, 0, 255), -1)
+        self.final_image = cv2.circle(image, (int(target[0] * self.width), int(target[1] * self.height)), 5, (255, 0, 255), -1)
         self.position = (cX/self.width, cY/self.height)
-        return self.position
+        
+        cgreenX, cgreenY = self.__get_sticker_coordinates(image_robotarm, green_sticker_min, green_sticker_max)
+        if (cgreenX == None or cgreenY == None):
+            print('Could not find arm green end coordinates, returning defaults...')
+            cgreenX = self.width // 2
+            cgreenY = self.height // 2
+        final = cv2.circle(final, (cgreenX, cgreenY), 5, (0, 0, 255), -1)
+        self.green_position = (cgreenX/self.width, cgreenY/self.height)
+        return [self.position, self.green_position ]
     
     def __save_sample(self, image, filename='sample.png'):
         if (self.debug):
