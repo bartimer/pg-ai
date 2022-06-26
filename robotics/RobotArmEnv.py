@@ -12,7 +12,7 @@ import collections
 class RobotArmEnv(gym.Env):
     def __init__(self):
         super().__init__()
-        self.observation_space = gym.spaces.Box(low=0.0, high=1.0, shape=(8,), dtype=np.float32)
+        self.observation_space = gym.spaces.Box(low=0.0, high=1.0, shape=(10,), dtype=np.float32)
         self.action_space = gym.spaces.Box(low=-1.0, high=1.0, shape=(2,), dtype=np.float32)
         self.controller = RobotArmController()
         self.detector = RobotArmDetector(False)
@@ -42,9 +42,12 @@ class RobotArmEnv(gym.Env):
             if self.target_index == 10: self.target_index = 1
         else:
             target_x, target_y = self.detector.get_target_location()
-        self.state = (target_x, target_y, x, y, positions[0],positions[1], green_x, green_y)
-        self.timestep = 0
+        self.closest_distance = 1
         self.stand_still_count = 0
+        self.state = (target_x, target_y, x, y, positions[0],positions[1], green_x, green_y, self.closest_distance, self.stand_still_count)
+        self.timestep = 0
+        
+        
         return self.state
 
     def step(self, action):
@@ -66,21 +69,28 @@ class RobotArmEnv(gym.Env):
         else:
             self.stand_still_count += 1
 
-        self.state = (target_x, target_y, new_x, new_y, new_servo_positions[0], new_servo_positions[1],green_x, green_y)
+        distance = sqrt((target_x - new_x) ** 2 + (target_y - new_y) ** 2)
+        closer = False
+        if  distance - self.closest_distance < -0.05:
+            print(f'Closer then before: was: {self.closest_distance} => now: {distance}')
+            self.closest_distance = distance
+            closer = True
+            
+
+        self.state = (target_x, target_y, new_x, new_y, new_servo_positions[0], new_servo_positions[1],green_x, green_y, self.closest_distance,self.stand_still_count)
         self.timestep += 1
         
-        self.visited_x.append(self.state[2])
-        self.visited_y.append(self.state[3])
-
         done = False
         distance_max = sqrt((np.max([target_x, 1-target_x])) ** 2 + ((np.max([target_y, 1-target_y])) ** 2))
-        distance = sqrt((target_x - new_x) ** 2 + (target_y - new_y) ** 2)
+        
 
         if distance < 0.04:
             reward = 50
             done = True
             self.episodes_with_success +=1
             print('Target reached!')
+        elif closer: 
+            reward = 1.1
         elif any_movement:
             reward = (1 - (distance/distance_max)**0.4)
         else:

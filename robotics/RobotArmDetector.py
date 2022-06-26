@@ -8,9 +8,9 @@ from cv2 import MORPH_OPEN
 import numpy as np
 
 cameraOnly = False
-arm_mask_min, arm_mask_max = np.array([0,36,0]),np.array([59,215,184])
-sticker_mask_min, sticker_mask_max = np.array([0,96,83]),np.array([7,255,214])
-green_sticker_min, green_sticker_max = np.array([22,21,60]),np.array([69,146,214])
+arm_mask_min, arm_mask_max = np.array([0,23,0]),np.array([53,253,255])
+sticker_mask_min, sticker_mask_max = np.array([0,112,33]),np.array([29,255,255])
+green_sticker_min, green_sticker_max = np.array([23,112,33]),np.array([62,255,255])
 
 default_target_locations = [(0.6,0.3),
 (0.41,0.29),

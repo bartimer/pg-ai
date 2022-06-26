@@ -16,8 +16,6 @@ class DiscreteRobotArmEnv(gym.Env):
         self.action_space = gym.spaces.Discrete(16)
         self.controller = RobotArmController()
         self.detector = RobotArmDetector(False)
-        self.visited_x = []
-        self.visited_y = []
         self.timsteps_max = 200
         self.episodes_without_success = 0
         self.episodes_with_success = 0
@@ -56,22 +54,11 @@ class DiscreteRobotArmEnv(gym.Env):
         green_x, green_y  =p[1]
         target_x, target_y = self.detector.get_target_location()
         
-        mean_previous_servo_pos = np.mean(self.previous_servo_positions, axis=0)
-        
-        any_movement = abs(new_servo_positions[0] - mean_previous_servo_pos[0]) > 0.01 or abs(
-            new_servo_positions[1] - mean_previous_servo_pos[1]) > 0.01
-        if any_movement:
-            self.stand_still_count = 0
-        else:
-            self.stand_still_count += 1
-
-        
         self.timestep += 1
         
         done = False
         
         distance_max = sqrt((np.max([target_x, 1-target_x])) ** 2 + ((np.max([target_y, 1-target_y])) ** 2))
-        previous_distance = sqrt((target_x - self.state[2]) ** 2 + (target_y - self.state[3]) ** 2)
         distance = sqrt((target_x - new_x) ** 2 + (target_y - new_y) ** 2)
         
         self.state = (target_x, target_y, new_x, new_y, new_servo_positions[0], new_servo_positions[1],green_x, green_y)
@@ -81,11 +68,8 @@ class DiscreteRobotArmEnv(gym.Env):
             done = True
             self.episodes_with_success +=1
             print('Target reached!')
-        elif any_movement:
-            reward = (1 - (distance/distance_max)**0.4)
         else:
-            reward = -0.1 + (-1) * float(np.max([0.2, distance])) * self.stand_still_count/self.timsteps_max
-
+            reward = (1 - (distance/distance_max)**0.4)
 
         if self.timestep == self.timsteps_max:
             done = True
