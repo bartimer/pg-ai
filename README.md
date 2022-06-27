@@ -21,20 +21,28 @@ This module focuses on data understanding, exploration, cleaning, integration, r
 This module focuses on understanding, applying and evaluating supervised, unsupervised learning, neural networks and reinforcement learning. The assigment was to predict the symboling value of a car. The notebook can be found [here](./machine-learning/ML-assignment-cars.ipynb).
 
 ### IOT & Big Data
-At the EHB premises, temperature and light sensors are installed at different locations. The assigment was to create a system that was able to collect data from all these devices and enrich, transform and store it. Once stored, a ML model had to be created to predict temperature and light (eventually the idea will be to create an AI based light and heating control system that minimize energy costs once the necessary data/infrasture is in place). The implementation can be found [here](./IOT).
+At the EHB premises, temperature and light sensors are installed at different locations. The assigment was to create a system that was able to collect data from all these devices and enrich, transform and store it. Once stored, a ML model had to be created to predict temperature and light (eventually the idea will be to create an AI based light and heating control system that minimize energy costs once the necessary data/infrasture is in place). 
+
+![Sensors with detail](./IOT/sensors-with-detail-small-.jpg)
+
+The implementation can be found [here](./IOT).
 
 ### Intelligent Interfaces
 This module focuses on AI techniques that can be used to interact in a more natural and personalized way with computer system (vision, speech, text, recommender systems, etc...). 
 
 For our assignment, we chose to implement a browser based rock, paper, scissors game with the help of face and hand gesture recognition, partially controlled by speech commands. 
 
-You can find the implementation [here](./II/app) 
+![rock](./II/images/rock.png)
+
+You can find are more [detailed description](./II/app/rock_paper_scisors.pdf) and the [implementation](./II/app) 
 
 Off course you can [play rock, paper, scissors](https://bartimer.github.io/pg-ai/#/intelligent-interfaces)
 
 ### Robotics
 
 This module combines robotics and AI with a focus on computer vision and reinforcement learning. For the assignment, we need to learn a robot arm to navigate to a location, pointed out by clicking on a live camera view of the robot arm. 
+
+![robot-arm](./robotics/images/robot-in-action-small.png)
 
 You can find the implementation [here](./robotics)
 
